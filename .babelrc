@@ -3,7 +3,10 @@
   "plugins": [
     [
       "transform-decorators-legacy",
-      "transform-regenerator"
+      "transform-regenerator",
+      ["babel-root-import", {
+        "rootPathSuffix": "src"
+      }]
     ]
   ]
 }

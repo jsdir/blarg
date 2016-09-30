@@ -8,8 +8,8 @@
     "build": "BLARG_ENV=production node_modules/.bin/webpack && cp -r static/* dist",
     "deploy": "aws s3 cp ./dist s3://blarg.im --recursive"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Jason Sommer <j@jsdir.net>",
+  "license": "MIT",
   "description": "",
   "devDependencies": {
     "babel-core": "^6.3.26",
@@ -21,6 +21,7 @@
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-react": "^6.3.13",
     "babel-preset-stage-0": "^6.3.13",
+    "babel-root-import": "^4.1.3",
     "css-loader": "^0.23.1",
     "eslint": "^3.7.0",
     "eslint-config-airbnb": "^12.0.0",
@@ -38,6 +39,10 @@
   },
   "dependencies": {
     "react": "^15.3.2",
-    "react-dom": "^15.3.2"
+    "react-dom": "^15.3.2",
+    "react-redux": "^4.4.5",
+    "react-router": "^2.8.1",
+    "redux": "^3.6.0",
+    "redux-router": "^2.1.2"
   }
 }

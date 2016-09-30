@@ -48,6 +48,11 @@ module.exports = {
     includePaths: [path.resolve(__dirname, './src/style')],
   },
   resolve: {
+    root: path.resolve(__dirname, './src'),
+    alias: {
+      components: 'components',
+      handlers: 'handlers',
+    },
     extensions: ['', '.js', '.jsx', '.json'],
   },
   eslint: {
