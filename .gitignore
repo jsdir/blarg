@@ -28,3 +28,7 @@ _testmain.go
 # Output of the go coverage tool, specifically when used with 
 LiteIDE
 *.out
+
+/blarg-api
+/scripts/dev_env.sh
+/scripts/prod_env.sh

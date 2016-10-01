@@ -1,0 +1,47 @@
+{
+	"ImportPath": "bitbucket.com/jsdir/blarg-api",
+	"GoVersion": "go1.7.1",
+	"Deps": [
+		{
+			"ImportPath": "github.com/garyburd/go-oauth/oauth",
+			"Rev": "719b069913e1151a73ea30d2ea4f90deda3ce234"
+		},
+		{
+			"ImportPath": "github.com/garyburd/redigo/internal",
+			"Rev": "6ece6e0a09f28cc399b21550cbf37ab39ba63cce"
+		},
+		{
+			"ImportPath": "github.com/garyburd/redigo/redis",
+			"Rev": "6ece6e0a09f28cc399b21550cbf37ab39ba63cce"
+		},
+		{
+			"ImportPath": "github.com/gorilla/context",
+			"Comment": "v1.1-7-g08b5f42",
+			"Rev": "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
+		},
+		{
+			"ImportPath": "github.com/gorilla/securecookie",
+			"Comment": "v1.1-4-gc13558c",
+			"Rev": "c13558c2b1c44da35e0eb043053609a5ba3a1f19"
+		},
+		{
+			"ImportPath": "github.com/gorilla/sessions",
+			"Comment": "v1.1",
+			"Rev": "ca9ada44574153444b00d3fd9c8559e4cc95f896"
+		},
+		{
+			"ImportPath": "goji.io",
+			"Comment": "v1.0-7-ge355964",
+			"Rev": "e355964ac565b94cf0fc7f218346626529125086"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "3b90a77d2885fb0429e8a21ab72fc73ca6f8b401"
+		},
+		{
+			"ImportPath": "gopkg.in/boj/redistore.v1",
+			"Comment": "v1.2",
+			"Rev": "fc113767cd6b051980f260d6dbe84b2740c46ab0"
+		}
+	]
+}
