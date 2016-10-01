@@ -1,16 +1,30 @@
 /* global API_BASE_URL */
 
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
+import { connect } from 'react-redux'
+import { replace } from 'redux-router'
 
-export default
 class Home extends Component {
 
   static propTypes = {
-
+    user: PropTypes.shape({
+      identity: PropTypes.string.isRequired,
+    }),
+    replace: PropTypes.func.isRequired,
   }
 
   componentWillMount() {
-    // TODO: if authenticated, redirect to the authenticated user's room.
+    this.loadProps(this.props)
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.loadProps(nextProps)
+  }
+
+  loadProps(props) {
+    if (props.user) {
+      this.props.replace(props.user.identity)
+    }
   }
 
   render() {
@@ -23,3 +37,7 @@ class Home extends Component {
     )
   }
 }
+
+export default connect(
+  ({ user }) => ({ user }), { replace }
+)(Home)

@@ -52,6 +52,7 @@ module.exports = {
     alias: {
       components: 'components',
       handlers: 'handlers',
+      actions: 'actions',
     },
     extensions: ['', '.js', '.jsx', '.json'],
   },

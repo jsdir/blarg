@@ -2,18 +2,34 @@
 
 import React from 'react'
 import { render } from 'react-dom'
-import { createStore } from 'redux'
+import { createStore, applyMiddleware, compose } from 'redux'
 import { Provider } from 'react-redux'
-import { Router, browserHistory as history } from 'react-router'
+import { ReduxRouter, reduxReactRouter } from 'redux-router'
+import createHistory from 'history/lib/createBrowserHistory'
 
 import reducer from './reducer'
 import routes from './routes'
+import connectionMiddleware from './middleware/connection'
 import './style.scss'
 
-const store = createStore(reducer)
+const store = createStore(
+  reducer,
+  {},
+  compose(
+    applyMiddleware(
+      connectionMiddleware,
+    ),
+    reduxReactRouter({ createHistory }),
+    window.devToolsExtension
+      ? window.devToolsExtension()
+      : f => f,
+  ),
+)
+
+window.store = store
 
 render((
   <Provider store={store}>
-    <Router history={history}>{routes}</Router>
+    <ReduxRouter>{routes}</ReduxRouter>
   </Provider>
 ), document.getElementById('root'))
