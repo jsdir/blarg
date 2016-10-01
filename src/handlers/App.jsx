@@ -1,4 +1,11 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
 
-const App = () => (<span>foo</span>)
+const App = props => (
+  <div className="App">{props.children}</div>
+)
+
+App.propTypes = {
+  children: PropTypes.node,
+}
+
 export default App

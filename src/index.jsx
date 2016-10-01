@@ -8,6 +8,7 @@ import { Router, browserHistory as history } from 'react-router'
 
 import reducer from './reducer'
 import routes from './routes'
+import './style.scss'
 
 const store = createStore(reducer)
 

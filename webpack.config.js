@@ -28,7 +28,7 @@ module.exports = {
     }),
     !isProduction && new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
-      API_BASE_URL: JSON.stringify(process.env.YIDE_LOCAL_API
+      API_BASE_URL: JSON.stringify(process.env.BLARG_LOCAL_API
         ? 'http://localhost:8000/v1'
         : 'https://api.blarg.im/v1'
       ),
