@@ -14,6 +14,7 @@ type Context struct {
 	RediStore   *redistore.RediStore
 	RedisPool   *redis.Pool
 	OAuthClient oauth.Client
+	State       State
 }
 
 func newPool(addr, password string) *redis.Pool {
@@ -76,5 +77,6 @@ func NewContext() Context {
 		RedisPool:   redisPool,
 		RediStore:   rediStore,
 		OAuthClient: oauthClient,
+		State:       &LocalState{},
 	}
 }
