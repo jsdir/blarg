@@ -12,13 +12,13 @@ class App extends Component {
     connectFeed: PropTypes.func.isRequired,
     disconnectFeed: PropTypes.func.isRequired,
     children: PropTypes.node,
-    user: PropTypes.oneOfType([
-      PropTypes.bool,
-      PropTypes.object,
-    ]),
+    session: PropTypes.shape({
+      loading: PropTypes.bool.isRequired,
+    }).isRequired,
   }
 
   componentWillMount() {
+    console.log(2342343)
     this.props.connectFeed()
   }
 
@@ -29,13 +29,15 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        {this.props.user === null ? (<div>loading</div>) : this.props.children}
+        {this.props.session.loading
+          ? (<div>loading</div>)
+          : this.props.children}
       </div>
     )
   }
 }
 
-export default connect(({ user }) => ({ user }), {
+export default connect(({ session }) => ({ session }), {
   connectFeed,
   disconnectFeed,
 })(App)

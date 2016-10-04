@@ -2,28 +2,31 @@
 
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-import { replace } from 'redux-router'
+// import { replace } from 'redux-router'
 
 class Home extends Component {
 
   static propTypes = {
-    user: PropTypes.shape({
-      identity: PropTypes.string.isRequired,
+    authenticatedUser: PropTypes.shape({
+      username: PropTypes.string.isRequired,
     }),
-    replace: PropTypes.func.isRequired,
+    session: PropTypes.shape({
+      user: PropTypes.shape({
+        username: PropTypes.string.isRequired,
+      }),
+    }).isRequired,
+  }
+
+  static contextTypes = {
+    router: PropTypes.object.isRequired,
   }
 
   componentWillMount() {
-    this.loadProps(this.props)
-  }
+    // If the user is authenticated, immediately redirect to their room.
+    const { user } = this.props.session
 
-  componentWillReceiveProps(nextProps) {
-    this.loadProps(nextProps)
-  }
-
-  loadProps(props) {
-    if (props.user) {
-      this.props.replace(props.user.identity)
+    if (user) {
+      this.context.router.replace(user.username)
     }
   }
 
@@ -39,5 +42,5 @@ class Home extends Component {
 }
 
 export default connect(
-  ({ user }) => ({ user }), { replace }
+  ({ session }) => ({ session })
 )(Home)

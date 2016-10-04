@@ -8,3 +8,8 @@ export const LEAVE = 'LEAVE'
 export const AUTH = 'AUTH'
 export const USER_JOINED = 'USER_JOINED'
 export const USER_LEFT = 'USER_LEFT'
+
+export const ADD_COMMENT = 'ADD_COMMENT'
+export const ROOM_INFO = 'ROOM_INFO'
+
+export const HANDLE_ERROR = 'HANDLE_ERROR'

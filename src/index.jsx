@@ -4,8 +4,9 @@ import React from 'react'
 import { render } from 'react-dom'
 import { createStore, applyMiddleware, compose } from 'redux'
 import { Provider } from 'react-redux'
-import { ReduxRouter, reduxReactRouter } from 'redux-router'
-import createHistory from 'history/lib/createBrowserHistory'
+import { Router, browserHistory } from 'react-router'
+// import createHistory from 'history/createBrowserHistory'
+// import { Router } from 'react-router'
 
 import reducer from './reducer'
 import routes from './routes'
@@ -19,7 +20,7 @@ const store = createStore(
     applyMiddleware(
       connectionMiddleware,
     ),
-    reduxReactRouter({ createHistory }),
+    // reduxReactRouter({ createHistory }),
     window.devToolsExtension
       ? window.devToolsExtension()
       : f => f,
@@ -30,6 +31,8 @@ window.store = store
 
 render((
   <Provider store={store}>
-    <ReduxRouter>{routes}</ReduxRouter>
+    <Router history={browserHistory}>
+      {routes}
+    </Router>
   </Provider>
 ), document.getElementById('root'))
