@@ -16,18 +16,18 @@ class Comments extends Component {
   }
 
   handleChangeCommentText = (event) => {
-    event.preventDefault()
-    event.stopImmediatePropagation()
     this.setState({ commentText: event.target.value })
   }
 
-  handleSubmit = () => {
+  handleSubmit = (event) => {
+    event.preventDefault()
+    // or e.stopPropagation()
     this.props.onSendComment(this.state.commentText)
-    this.setState({ commentText: null })
+    this.setState({ commentText: '' })
   }
 
   renderComment = (comment, index) => (
-    <div key={index}>comment</div>
+    <div key={index}>{comment.text}</div>
   )
 
   renderInput() {
@@ -49,7 +49,7 @@ class Comments extends Component {
           Comments
         </div>
         <div className="Comments__list">
-          {this.props.comments.forEach(this.renderComment)}
+          {this.props.comments.map(this.renderComment)}
         </div>
         {this.props.user && this.renderInput()}
       </div>

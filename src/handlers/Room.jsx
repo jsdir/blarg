@@ -16,11 +16,12 @@ class Room extends Component {
     }).isRequired,
     join: PropTypes.func.isRequired,
     leave: PropTypes.func.isRequired,
-    room: PropTypes.objectOf(PropTypes.shape({
-      users: PropTypes.arrayOf(PropTypes.string).isRequired,
-      totalUsers: PropTypes.number.isRequired,
-      // comments: PropTypes.array.isRequired,
-    })),
+    room: PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      viewers: PropTypes.arrayOf(PropTypes.string).isRequired,
+      totalViewers: PropTypes.number.isRequired,
+      comments: PropTypes.array.isRequired,
+    }),
     session: PropTypes.shape({
       user: PropTypes.any,
     }).isRequired,
@@ -42,14 +43,14 @@ class Room extends Component {
   }
 
   render() {
-    const { username } = this.props.params
+    // const { username } = this.props.params
     const { room } = this.props
     /* const room = this.props.rooms
      *   && this.props.rooms[username]
      */
     return (
       <div className="Room">
-        {username} room
+        <h1>{room.title}</h1>
         <Comments
           user={this.props.session.user}
           comments={room.comments}
@@ -63,6 +64,8 @@ class Room extends Component {
 const defaultRoom = {
   comments: [],
   title: 'untitled room',
+  viewers: [],
+  totalViewers: 0,
 }
 
 export default connect(

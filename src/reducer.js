@@ -8,7 +8,7 @@ import {
   JOIN,
   LEAVE,
   ADD_COMMENT,
-  ROOM_INFO,
+  ROOM_DATA,
 } from 'constants'
 
 const sessionReducer = handleActions({
@@ -30,16 +30,20 @@ const roomsReducer = handleActions({
     Object.assign({}, state, { activeRoomId: null })
   ),
   [ADD_COMMENT]: (state, action) => update(state, {
-    [state.activeRoomId]: {
-      comments: { $push: [{
-        text: action.payload,
-      }] },
+    rooms: {
+      [state.activeRoomId]: {
+        comments: { $push: [{
+          text: action.payload,
+        }] },
+      },
     },
   }),
-  [ROOM_INFO]: (state, action) => update(state, {
-    // send the `roomId` in the payload
-    [state.activeRoomId]: {
-      $merge: action.payload,
+  [ROOM_DATA]: (state, action) => update(state, {
+    rooms: {
+      $merge: {
+        // send the `roomId` in the payload
+        [state.activeRoomId]: action.payload,
+      },
     },
   }),
 }, {
