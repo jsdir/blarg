@@ -20,7 +20,7 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-func makeMessage(
+func getMessage(
 	messageType string, payload map[string]interface{},
 ) map[string]interface{} {
 	return map[string]interface{}{
@@ -29,17 +29,17 @@ func makeMessage(
 	}
 }
 
-func (c *Context) HandleWS(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Print("upgrade:", err)
+		log.Println("upgrade:", err)
 		return
 	}
 	defer conn.Close()
 
-	session, err := c.RediStore.Get(r, sessionPrefix)
+	session, err := s.RediStore.Get(r, sessionPrefix)
 	if err != nil {
-		http.Error(w, "Error getting session, "+err.Error(), 500)
+		handleInternalServerError(err, w)
 		return
 	}
 
@@ -59,20 +59,20 @@ func (c *Context) HandleWS(w http.ResponseWriter, r *http.Request) {
 
 	err = conn.WriteJSON(message)
 	if err != nil {
-		http.Error(w, "Error sending AUTH, "+err.Error(), 500)
+		handleInternalServerError(err, w)
 		return
 	}
 
 	// errch := make(chan error)
 	stopch := make(chan bool)
-
 	currentRoomId := ""
 
 	// Receive messages
 	for {
 		var message RoomMessage
 		if err := conn.ReadJSON(&message); err != nil {
-			panic(err)
+			handleInternalServerError(err, w)
+			return
 		}
 
 		switch message.Type {
@@ -82,14 +82,14 @@ func (c *Context) HandleWS(w http.ResponseWriter, r *http.Request) {
 			}
 
 			currentRoomId = message.Payload.(string)
-			print(currentRoomId)
-			room := c.State.Join(currentRoomId, userId)
+			println("currentRoomId: ", currentRoomId)
+			room := s.State.Join(currentRoomId, userId)
 
 			// Send the initial payload on join.
-			roomData := makeMessage(ROOM_DATA, room.ToJSON())
+			roomData := getMessage(ROOM_DATA, room.ToJSON())
 			if err = conn.WriteJSON(roomData); err != nil {
-				log.Println(err.Error())
-				// continue
+				handleInternalServerError(err, w)
+				return
 			}
 
 			// messages := c.State.Subscribe(currentRoomId)
@@ -110,7 +110,7 @@ func (c *Context) HandleWS(w http.ResponseWriter, r *http.Request) {
 
 		case LEAVE:
 			if currentRoomId != "" {
-				c.State.Leave(currentRoomId, userId)
+				s.State.Leave(currentRoomId, userId)
 				currentRoomId = ""
 				stopch <- true
 			}
@@ -119,7 +119,7 @@ func (c *Context) HandleWS(w http.ResponseWriter, r *http.Request) {
 			// 1. A room is already loaded.
 			// 2. The user is authenticated.
 			if currentRoomId != "" && userId != "" {
-				c.State.AddComment(currentRoomId, Comment{
+				s.State.AddComment(currentRoomId, Comment{
 					SenderId: userId,
 					Text:     message.Payload.(string),
 				})
@@ -131,7 +131,7 @@ func (c *Context) HandleWS(w http.ResponseWriter, r *http.Request) {
 			// 3. The user is the host.
 			if currentRoomId != "" && userId != "" && currentRoomId == userId {
 				title := message.Payload.(string)
-				c.State.ChangeRoomTitle(currentRoomId, title)
+				s.State.ChangeRoomTitle(currentRoomId, title)
 			}
 		}
 	}

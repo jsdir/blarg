@@ -10,11 +10,17 @@ import (
 	"gopkg.in/boj/redistore.v1"
 )
 
-type Context struct {
-	RediStore   *redistore.RediStore
-	RedisPool   *redis.Pool
-	OAuthClient oauth.Client
-	State       State
+const (
+	Development = iota
+	Production
+)
+
+type Server struct {
+	RediStore     *redistore.RediStore
+	RedisPool     *redis.Pool
+	OAuthClient   oauth.Client
+	State         State
+	ClientBaseUrl string
 }
 
 func newPool(addr, password string) *redis.Pool {
@@ -51,7 +57,13 @@ func newPool(addr, password string) *redis.Pool {
 	}
 }
 
-func NewContext() Context {
+func NewServer() Server {
+	// Get environment
+	environment := Development
+	if os.Getenv("BLARG_ENV") == "production" {
+		environment = Production
+	}
+
 	// Redis
 	redisAddr := os.Getenv("REDIS_PORT_6379_TCP_ADDR") +
 		":" + os.Getenv("REDIS_PORT_6379_TCP_PORT")
@@ -73,10 +85,20 @@ func NewContext() Context {
 	oauthClient.Credentials.Token = os.Getenv("TWITTER_KEY")
 	oauthClient.Credentials.Secret = os.Getenv("TWITTER_SECRET_KEY")
 
-	return Context{
-		RedisPool:   redisPool,
-		RediStore:   rediStore,
-		OAuthClient: oauthClient,
-		State:       &LocalState{},
+	// State
+	state := NewLocalState()
+
+	// Config
+	clientBaseUrl := "http://localhost:3000"
+	if environment == Production {
+		clientBaseUrl = "https://blarg.im"
+	}
+
+	return Server{
+		RedisPool:     redisPool,
+		RediStore:     rediStore,
+		OAuthClient:   oauthClient,
+		State:         &state,
+		ClientBaseUrl: clientBaseUrl,
 	}
 }

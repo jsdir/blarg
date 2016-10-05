@@ -1,17 +1,15 @@
 package main
 
-// base client url
-
 import (
 	"log"
 	"net/http"
 )
 
 func main() {
-	ctx := NewContext()
-	defer ctx.RediStore.Close()
-	defer ctx.RedisPool.Close()
+	server := NewServer()
+	defer server.RediStore.Close()
+	defer server.RedisPool.Close()
 
-	log.Println("started server")
-	log.Fatal(http.ListenAndServe("localhost:8000", NewRouter(&ctx)))
+	log.Println("started server at localhost:8000")
+	log.Fatal(http.ListenAndServe("localhost:8000", NewRouter(&server)))
 }

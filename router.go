@@ -6,7 +6,7 @@ import (
 	"goji.io/pat"
 )
 
-func NewRouter(ctx *Context) *goji.Mux {
+func NewRouter(s *Server) *goji.Mux {
 	mux := goji.NewMux()
 
 	// CORS
@@ -16,8 +16,8 @@ func NewRouter(ctx *Context) *goji.Mux {
 	})
 	mux.Use(c.Handler)
 
-	mux.HandleFunc(pat.Get("/v1/authenticate"), ctx.HandleAuthenticate)
-	mux.HandleFunc(pat.Get("/v1/callback"), ctx.HandleCallback)
-	mux.HandleFunc(pat.Get("/v1/ws"), ctx.HandleWS)
+	mux.HandleFunc(pat.Get("/v1/authenticate"), s.HandleAuthenticate)
+	mux.HandleFunc(pat.Get("/v1/callback"), s.HandleCallback)
+	mux.HandleFunc(pat.Get("/v1/ws"), s.HandleWS)
 	return mux
 }

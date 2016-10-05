@@ -35,6 +35,7 @@ func (r *Room) ToJSON() map[string]interface{} {
 		"title":        r.title,
 		"viewers":      viewerIds,
 		"totalViewers": r.totalViewers,
+		"comments":     r.comments,
 	}
 }
 
@@ -52,12 +53,19 @@ type LocalState struct {
 	rooms map[string]Room
 }
 
+func NewLocalState() LocalState {
+	return LocalState{
+		rooms: map[string]Room{},
+	}
+}
+
 func (s *LocalState) Join(roomId string, userId string) *Room {
 	room := s.getRoom(roomId)
 	if room == nil {
 		room = &Room{
-			title:   userId + "'s Room",
-			viewers: make(map[string]bool),
+			title:    userId + "'s Room",
+			viewers:  make(map[string]bool),
+			comments: []Comment{},
 		}
 	}
 
@@ -97,6 +105,7 @@ func (s *LocalState) AddComment(roomId string, comment Comment) {
 		return
 	}
 
+	fmt.Printf("%#v", comment)
 	room.comments = append(room.comments, comment)
 
 	s.broadcast(roomId, RoomMessage{
@@ -134,6 +143,9 @@ func (s *LocalState) broadcast(roomId string, message RoomMessage) {
 }
 
 func (s *LocalState) getRoom(roomId string) *Room {
-	room := s.rooms[roomId]
-	return &room
+	room, ok := s.rooms[roomId]
+	if ok {
+		return &room
+	}
+	return nil
 }
