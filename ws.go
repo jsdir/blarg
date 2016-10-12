@@ -14,6 +14,11 @@ const (
 	ADD_COMMENT  = "ADD_COMMENT"
 	CHANGE_TITLE = "CHANGE_TITLE"
 	ROOM_DATA    = "ROOM_DATA"
+
+	// events
+	COMMENT_ADDED = "COMMENT_ADDED"
+	USER_JOINED   = "USER_JOINED"
+	USER_LEFT     = "USER_LEFT"
 )
 
 var upgrader = websocket.Upgrader{
@@ -63,57 +68,68 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// errch := make(chan error)
-	stopch := make(chan bool)
+	// Only one room available per connection.
 	currentRoomId := ""
+
+	leaveChan := make(chan bool)
+	leave := func() {
+		if currentRoomId != "" {
+			leaveChan <- true
+			s.State.Leave(currentRoomId, userId)
+		}
+	}
+	defer leave()
 
 	// Receive messages
 	for {
 		var message RoomMessage
 		if err := conn.ReadJSON(&message); err != nil {
-			handleInternalServerError(err, w)
+			log.Println(err)
+			// TODO: ignore close errors
+			// Leave all the current channel if the connection is closed.
+			// if websocket. .IsCloseError(err) {
+			// 	log.Println(err)
+			// 	// handleInternalServerError(err, w)
+			// }
+			// leave <- true
 			return
 		}
 
 		switch message.Type {
 		case JOIN:
-			if currentRoomId != "" {
-				stopch <- true
-			}
-
+			leave()
 			currentRoomId = message.Payload.(string)
-			println("currentRoomId: ", currentRoomId)
 			room := s.State.Join(currentRoomId, userId)
 
 			// Send the initial payload on join.
 			roomData := getMessage(ROOM_DATA, room.ToJSON())
 			if err = conn.WriteJSON(roomData); err != nil {
-				handleInternalServerError(err, w)
+				// TODO: leave <- true
+				// handleInternalServerError(err, w)
 				return
 			}
 
-			// messages := c.State.Subscribe(currentRoomId)
-			// go func() {
-			// 	for {
-			// 		select {
-			// 		case message := <-messages:
-			// 			err = conn.WriteJSON(message.Payload)
-			// 			if err != nil {
-			// 				// TODO: errch <- err
-			// 				return
-			// 			}
-			// 		case <-stopch:
-			// 			return
-			// 		}
-			// 	}
-			// }()
+			// Subscribe to any changes in the room.
+			messages, cancelChan := s.State.Subscribe(currentRoomId)
+			go func() {
+				for {
+					select {
+					case message := <-messages:
+						err = conn.WriteJSON(map[string]interface{}{
+							"payload": message.Payload,
+							"type":    message.Type,
+						})
+						if err != nil {
+							// TODO: errch <- err
+							return
+						}
+					case <-leaveChan:
+						cancelChan <- true
+						return
+					}
+				}
+			}()
 
-		case LEAVE:
-			if currentRoomId != "" {
-				s.State.Leave(currentRoomId, userId)
-				currentRoomId = ""
-				stopch <- true
-			}
 		case ADD_COMMENT:
 			// Checks that:
 			// 1. A room is already loaded.
@@ -124,6 +140,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 					Text:     message.Payload.(string),
 				})
 			}
+
 		case CHANGE_TITLE:
 			// Checks that:
 			// 1. A room is already loaded.

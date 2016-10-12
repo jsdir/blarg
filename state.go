@@ -1,9 +1,6 @@
 package main
 
-import (
-	"errors"
-	"fmt"
-)
+import "errors"
 
 type RoomMessage struct {
 	Type    string
@@ -11,8 +8,8 @@ type RoomMessage struct {
 }
 
 type Comment struct {
-	Text     string
-	SenderId string
+	Text     string `json:"text"`
+	SenderId string `json:"senderId"`
 }
 
 type Room struct {
@@ -20,7 +17,7 @@ type Room struct {
 	comments     []Comment
 	totalViewers int64
 	viewers      map[string]bool
-	subscribers  []chan RoomMessage
+	subscribers  map[chan RoomMessage]bool
 }
 
 var noRoomError = errors.New("room not found")
@@ -46,7 +43,7 @@ type State interface {
 	Leave(roomId string, userId string)
 	AddComment(roomId string, comment Comment)
 	ChangeRoomTitle(roomId string, title string)
-	// Subscribe(roomId string) chan RoomMessage
+	Subscribe(roomId string) (chan RoomMessage, chan bool)
 }
 
 type LocalState struct {
@@ -60,56 +57,57 @@ func NewLocalState() LocalState {
 }
 
 func (s *LocalState) Join(roomId string, userId string) *Room {
-	room := s.getRoom(roomId)
-	if room == nil {
-		room = &Room{
-			title:    userId + "'s Room",
-			viewers:  make(map[string]bool),
-			comments: []Comment{},
+	room, ok := s.rooms[roomId]
+	if !ok {
+		room = Room{
+			title:       userId + "'s Room",
+			viewers:     make(map[string]bool),
+			comments:    []Comment{},
+			subscribers: map[chan RoomMessage]bool{},
 		}
 	}
 
-	fmt.Printf("%#v", room)
 	room.viewers[userId] = true
 	// TODO: use unique ips for unauthenticated users.
 	// use redis HyperLogLogs?
 	room.totalViewers += 1
 
 	s.broadcast(roomId, RoomMessage{
-		Type:    JOIN,
+		Type:    USER_JOINED,
 		Payload: userId,
 	})
 
-	s.rooms[roomId] = *room
+	s.rooms[roomId] = room
 
-	return room
+	return &room
 }
 
 func (s *LocalState) Leave(roomId string, userId string) {
-	room := s.getRoom(roomId)
-	if room == nil {
+	room, ok := s.rooms[roomId]
+	if !ok {
 		return
 	}
 
 	delete(room.viewers, userId)
+	s.rooms[roomId] = room
 
 	s.broadcast(roomId, RoomMessage{
-		Type:    LEAVE,
+		Type:    USER_LEFT,
 		Payload: userId,
 	})
 }
 
 func (s *LocalState) AddComment(roomId string, comment Comment) {
-	room := s.getRoom(roomId)
-	if room == nil {
+	room, ok := s.rooms[roomId]
+	if !ok {
 		return
 	}
 
-	fmt.Printf("%#v", comment)
 	room.comments = append(room.comments, comment)
+	s.rooms[roomId] = room
 
 	s.broadcast(roomId, RoomMessage{
-		Type: ADD_COMMENT,
+		Type: COMMENT_ADDED,
 		Payload: map[string]interface{}{
 			"text":     comment.Text,
 			"senderId": comment.SenderId,
@@ -118,12 +116,13 @@ func (s *LocalState) AddComment(roomId string, comment Comment) {
 }
 
 func (s *LocalState) ChangeRoomTitle(roomId string, title string) {
-	room := s.getRoom(roomId)
-	if room == nil {
+	room, ok := s.rooms[roomId]
+	if !ok {
 		return
 	}
 
 	room.title = title
+	s.rooms[roomId] = room
 
 	s.broadcast(roomId, RoomMessage{
 		Type:    CHANGE_TITLE,
@@ -131,21 +130,35 @@ func (s *LocalState) ChangeRoomTitle(roomId string, title string) {
 	})
 }
 
+func (s *LocalState) Subscribe(roomId string) (chan RoomMessage, chan bool) {
+	room, ok := s.rooms[roomId]
+	if !ok {
+		return nil, nil
+	}
+
+	messages := make(chan RoomMessage)
+	room.subscribers[messages] = true
+
+	s.rooms[roomId] = room
+
+	cancelChan := make(chan bool)
+
+	go func() {
+		<-cancelChan
+		delete(room.subscribers, messages)
+	}()
+
+	return messages, cancelChan
+
+}
+
 func (s *LocalState) broadcast(roomId string, message RoomMessage) {
-	room := s.getRoom(roomId)
-	if room == nil {
+	room, ok := s.rooms[roomId]
+	if !ok {
 		return
 	}
 
-	for _, subscriber := range room.subscribers {
+	for subscriber := range room.subscribers {
 		subscriber <- message
 	}
-}
-
-func (s *LocalState) getRoom(roomId string) *Room {
-	room, ok := s.rooms[roomId]
-	if ok {
-		return &room
-	}
-	return nil
 }
