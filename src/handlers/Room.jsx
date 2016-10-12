@@ -22,7 +22,7 @@ class Room extends Component {
       totalViewers: PropTypes.number.isRequired,
       comments: PropTypes.array.isRequired,
     }),
-    session: PropTypes.shape({
+    rooms: PropTypes.shape({
       user: PropTypes.any,
     }).isRequired,
     addComment: PropTypes.func.isRequired,
@@ -37,24 +37,15 @@ class Room extends Component {
     this.props.leave()
   }
 
-  addComment(text) {
-    const { username } = this.props.params
-    this.props.addComment(username, text)
-  }
-
   render() {
-    // const { username } = this.props.params
     const { room } = this.props
-    /* const room = this.props.rooms
-     *   && this.props.rooms[username]
-     */
     return (
       <div className="Room">
         <h1>{room.title}</h1>
         <Comments
-          user={this.props.session.user}
+          user={this.props.rooms.user}
           comments={room.comments}
-          onSendComment={this.props.addComment}
+          onAddComment={this.props.addComment}
         />
       </div>
     )
@@ -69,8 +60,8 @@ const defaultRoom = {
 }
 
 export default connect(
-  ({ session, rooms }, props) => ({
-    session,
+  ({ rooms }, props) => ({
+    rooms,
     room: rooms.rooms[props.params.username]
       || defaultRoom,
   }), {

@@ -1,5 +1,4 @@
 import { combineReducers } from 'redux'
-import { routerStateReducer } from 'redux-router'
 import { handleActions } from 'redux-actions'
 import update from 'react-addons-update'
 
@@ -9,17 +8,8 @@ import {
   LEAVE,
   ADD_COMMENT,
   ROOM_DATA,
+  COMMENT_ADDED,
 } from 'constants'
-
-const sessionReducer = handleActions({
-  [AUTH]: (state, action) => ({
-    user: action.payload,
-    loading: false,
-  }),
-}, {
-  user: null,
-  loading: true,
-})
 
 const roomsReducer = handleActions({
   [JOIN]: (state, action) => (
@@ -33,11 +23,25 @@ const roomsReducer = handleActions({
     rooms: {
       [state.activeRoomId]: {
         comments: { $push: [{
+          senderId: state.user.username,
           text: action.payload,
         }] },
       },
     },
   }),
+  [COMMENT_ADDED]: (state, action) => {
+    if (state.user && action.payload.senderId === state.user.username) {
+      return state
+    }
+
+    return update(state, {
+      rooms: {
+        [state.activeRoomId]: {
+          comments: { $push: [action.payload] },
+        },
+      },
+    })
+  },
   [ROOM_DATA]: (state, action) => update(state, {
     rooms: {
       $merge: {
@@ -46,13 +50,17 @@ const roomsReducer = handleActions({
       },
     },
   }),
+  [AUTH]: (state, action) => update(state, { $merge: {
+    user: action.payload,
+    loading: false,
+  } }),
 }, {
   rooms: {},
   activeRoomId: null,
+  user: null,
+  loading: true,
 })
 
 export default combineReducers({
-  session: sessionReducer,
   rooms: roomsReducer,
-  router: routerStateReducer,
 })

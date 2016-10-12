@@ -8,7 +8,7 @@ class Comments extends Component {
       text: PropTypes.string,
       user: PropTypes.string,
     })).isRequired,
-    onSendComment: PropTypes.func.isRequired,
+    onAddComment: PropTypes.func.isRequired,
   }
 
   state = {
@@ -22,7 +22,7 @@ class Comments extends Component {
   handleSubmit = (event) => {
     event.preventDefault()
     // or e.stopPropagation()
-    this.props.onSendComment(this.state.commentText)
+    this.props.onAddComment(this.state.commentText)
     this.setState({ commentText: '' })
   }
 

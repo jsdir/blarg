@@ -13,3 +13,4 @@ export const ADD_COMMENT = 'ADD_COMMENT'
 export const ROOM_DATA = 'ROOM_DATA'
 
 export const HANDLE_ERROR = 'HANDLE_ERROR'
+export const COMMENT_ADDED = 'COMMENT_ADDED'

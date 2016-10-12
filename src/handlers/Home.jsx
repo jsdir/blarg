@@ -10,7 +10,7 @@ class Home extends Component {
     authenticatedUser: PropTypes.shape({
       username: PropTypes.string.isRequired,
     }),
-    session: PropTypes.shape({
+    rooms: PropTypes.shape({
       user: PropTypes.shape({
         username: PropTypes.string.isRequired,
       }),
@@ -23,7 +23,7 @@ class Home extends Component {
 
   componentWillMount() {
     // If the user is authenticated, immediately redirect to their room.
-    const { user } = this.props.session
+    const { user } = this.props.rooms
 
     if (user) {
       this.context.router.replace(user.username)
@@ -42,5 +42,5 @@ class Home extends Component {
 }
 
 export default connect(
-  ({ session }) => ({ session })
+  ({ rooms }) => ({ rooms })
 )(Home)
