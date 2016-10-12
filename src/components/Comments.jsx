@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 
+import Username from 'components/Username'
+
 class Comments extends Component {
 
   static propTypes = {
@@ -27,7 +29,11 @@ class Comments extends Component {
   }
 
   renderComment = (comment, index) => (
-    <div key={index}>{comment.text}</div>
+    <div key={index}>
+      <Username username={comment.senderId} />
+      {' '}
+      {comment.text}
+    </div>
   )
 
   renderInput() {

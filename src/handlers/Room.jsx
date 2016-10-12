@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 
+import Viewers from 'components/Viewers'
 import Comments from 'components/Comments'
 import {
   join,
@@ -41,7 +42,13 @@ class Room extends Component {
     const { room } = this.props
     return (
       <div className="Room">
-        <h1>{room.title}</h1>
+        <div className="Room__header">
+          <span className="Room__title">{room.title}</span>
+          <Viewers
+            viewers={room.viewers}
+            totalViewers={room.totalViewers}
+          />
+        </div>
         <Comments
           user={this.props.rooms.user}
           comments={room.comments}
