@@ -67,7 +67,10 @@ func (s *LocalState) Join(roomId string, userId string) *Room {
 		}
 	}
 
-	room.viewers[userId] = true
+	if userId != "" {
+		room.viewers[userId] = true
+	}
+
 	// TODO: use unique ips for unauthenticated users.
 	// use redis HyperLogLogs?
 	room.totalViewers += 1

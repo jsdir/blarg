@@ -84,6 +84,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 	for {
 		var message RoomMessage
 		if err := conn.ReadJSON(&message); err != nil {
+			// leaveChan <- true
 			log.Println(err)
 			// TODO: ignore close errors
 			// Leave all the current channel if the connection is closed.
