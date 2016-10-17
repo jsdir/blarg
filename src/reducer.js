@@ -9,7 +9,12 @@ import {
   ADD_COMMENT,
   ROOM_DATA,
   COMMENT_ADDED,
+  USER_JOINED,
+  USER_LEFT,
 } from 'constants'
+
+const incr = v => v + 1
+const decr = v => v - 1
 
 const roomsReducer = handleActions({
   [JOIN]: (state, action) => (
@@ -54,6 +59,26 @@ const roomsReducer = handleActions({
     user: action.payload,
     loading: false,
   } }),
+  [USER_JOINED]: (state, action) => update(state, {
+    rooms: {
+      [state.activeRoomId]: {
+        totalViewers: { $apply: incr },
+        ...(action.payload && {
+          viewers: { $push: [action.payload] },
+        }),
+      },
+    },
+  }),
+  [USER_LEFT]: (state, action) => update(state, {
+    rooms: {
+      [state.activeRoomId]: {
+        totalViewers: { $apply: decr },
+        ...(action.payload && {
+          viewers: { $apply: v => v.filter(vv => vv !== action.payload) },
+        }),
+      },
+    },
+  }),
 }, {
   rooms: {},
   activeRoomId: null,
