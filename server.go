@@ -15,6 +15,15 @@ const (
 	Production
 )
 
+// Environment Variables:
+
+// BLARG_ENV
+// TWITTER_KEY
+// TWITTER_SECRET_KEY
+// REDIS_PORT_6379_TCP_ADDR
+// REDIS_PORT_6379_TCP_POST
+// REDIS_PASSWORD
+
 type Server struct {
 	RediStore     *redistore.RediStore
 	RedisPool     *redis.Pool
@@ -91,7 +100,7 @@ func NewServer() Server {
 	// Config
 	clientBaseUrl := "http://localhost:3000"
 	if environment == Production {
-		clientBaseUrl = "https://blarg.im"
+		clientBaseUrl = "https://blarg-im.herokuapp.com"
 	}
 
 	return Server{
