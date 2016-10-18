@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -10,6 +11,13 @@ func main() {
 	defer server.RediStore.Close()
 	defer server.RedisPool.Close()
 
-	log.Println("started server at localhost:8000")
-	log.Fatal(http.ListenAndServe("localhost:8000", NewRouter(&server)))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
+
+	addr := "0.0.0.0:" + port
+
+	log.Println("started server at " + addr)
+	log.Fatal(http.ListenAndServe(addr, NewRouter(&server)))
 }
