@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "build": "BLARG_ENV=production node_modules/.bin/webpack && cp -r static/* dist",
-    "deploy": "aws s3 cp ./dist s3://blarg.im --recursive"
+    "deploy": "aws s3 cp ./dist s3://blarg.im --recursive",
+    "postinstall": "npm run build"
   },
   "author": "Jason Sommer <j@jsdir.net>",
   "license": "MIT",
