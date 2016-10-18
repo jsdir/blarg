@@ -52,6 +52,38 @@ input {
 
 // components
 
+.Home {
+  text-align: center;
+  margin-top: 100px;
+
+  h1 {
+    font-size: 100px;
+  }
+
+  p {
+    padding: 20px 0 90px;
+    font-size: 20px;
+  }
+}
+
+.Button {
+  display: inline-block;
+  background-color: #00aced;
+  outline: none;
+  padding: 9px;
+  vertical-align: middle;
+  color: #fff;
+  border-radius: 4px;
+  font-weight: bold;
+  padding-left: 18px;
+  padding-right: 18px;
+  position: relative;
+
+  .Icon {
+    margin-right: 8px;
+  }
+}
+
 .Room {
 
   &__title {

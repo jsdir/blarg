@@ -10,6 +10,7 @@ import { Router, browserHistory } from 'react-router'
 
 import reducer from './reducer'
 import routes from './routes'
+import { connectFeed } from './actions'
 import connectionMiddleware from './middleware/connection'
 import './style.scss'
 
@@ -26,6 +27,8 @@ const store = createStore(
       : f => f,
   ),
 )
+
+store.dispatch(connectFeed())
 
 window.store = store
 

@@ -10,6 +10,7 @@
   </head>
   <body>
     <div id="root"></div>
+    <script onload="this.parentElement.removeChild(this)">window.BLARG_PAYLOAD = JSON.parse('{{ .Payload }}');</script>
     <script src="/static/bundle.js"></script>
   </body>
 </html>

@@ -2,7 +2,9 @@
 
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
-// import { replace } from 'redux-router'
+
+import Button from 'components/Button'
+import Icon from 'components/Icon'
 
 class Home extends Component {
 
@@ -32,10 +34,13 @@ class Home extends Component {
 
   render() {
     return (
-      <div>
-        <h1>Blarg.im</h1>
-        <p>A humble clone of <a href="https://blab.im">Blab.im</a></p>
-        <a href={`${API_BASE_URL}/authenticate`}>Login With Twitter</a>
+      <div className="Home">
+        <h1>Blarg</h1>
+        <p>Ramble with friends.</p>
+        <Button
+          component="a"
+          href={`${API_BASE_URL}/authenticate`}
+        ><Icon type="twitter" />Login with Twitter</Button>
       </div>
     )
   }

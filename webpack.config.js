@@ -9,12 +9,10 @@ module.exports = {
   devtool: 'eval',
   entry: _.compact([
     'babel-polyfill',
-    !isProduction && 'webpack-dev-server/client?http://localhost:3000',
-    !isProduction && 'webpack/hot/only-dev-server',
     './src/index',
   ]),
   output: {
-    path: path.join(__dirname, 'dist', 'static'),
+    path: path.join(__dirname, 'static'),
     filename: 'bundle.js',
     publicPath: '/static/',
   },

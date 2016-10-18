@@ -5,7 +5,7 @@ import Username from 'components/Username'
 class Comments extends Component {
 
   static propTypes = {
-    user: PropTypes.shape({}),
+    userId: PropTypes.string,
     comments: PropTypes.arrayOf(PropTypes.shape({
       text: PropTypes.string,
       user: PropTypes.string,
@@ -57,7 +57,7 @@ class Comments extends Component {
         <div className="Comments__list">
           {this.props.comments.map(this.renderComment)}
         </div>
-        {this.props.user && this.renderInput()}
+        {this.props.userId && this.renderInput()}
       </div>
     )
   }

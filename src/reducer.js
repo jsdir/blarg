@@ -1,9 +1,10 @@
+/* eslint-env browser */
+
 import { combineReducers } from 'redux'
 import { handleActions } from 'redux-actions'
 import update from 'react-addons-update'
 
 import {
-  AUTH,
   JOIN,
   LEAVE,
   ADD_COMMENT,
@@ -28,14 +29,14 @@ const roomsReducer = handleActions({
     rooms: {
       [state.activeRoomId]: {
         comments: { $push: [{
-          senderId: state.user.username,
+          senderId: state.userId,
           text: action.payload,
         }] },
       },
     },
   }),
   [COMMENT_ADDED]: (state, action) => {
-    if (state.user && action.payload.senderId === state.user.username) {
+    if (action.payload.senderId === state.userId) {
       return state
     }
 
@@ -55,10 +56,6 @@ const roomsReducer = handleActions({
       },
     },
   }),
-  [AUTH]: (state, action) => update(state, { $merge: {
-    user: action.payload,
-    loading: false,
-  } }),
   [USER_JOINED]: (state, action) => update(state, {
     rooms: {
       [state.activeRoomId]: {
@@ -83,8 +80,7 @@ const roomsReducer = handleActions({
 }, {
   rooms: {},
   activeRoomId: null,
-  user: null,
-  loading: true,
+  userId: window.BLARG_PAYLOAD.userId,
 })
 
 export default combineReducers({

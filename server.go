@@ -98,7 +98,7 @@ func NewServer() Server {
 	state := NewLocalState()
 
 	// Config
-	clientBaseUrl := "http://localhost:3000"
+	clientBaseUrl := "http://localhost:8000"
 	if environment == Production {
 		clientBaseUrl = "https://blarg-im.herokuapp.com"
 	}

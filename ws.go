@@ -84,8 +84,8 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 	for {
 		var message RoomMessage
 		if err := conn.ReadJSON(&message); err != nil {
-			if !websocket.IsCloseError(err) {
-				log.Println(err)
+			if !websocket.IsCloseError(err, websocket.CloseGoingAway) {
+				log.Println("read error:", err)
 			}
 			return
 		}
@@ -99,7 +99,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			// Send the initial payload on join.
 			roomData := getMessage(ROOM_DATA, room.ToJSON())
 			if err = conn.WriteJSON(roomData); err != nil {
-				handleInternalServerError(err, w)
+				log.Println("JOIN:", err)
 				return
 			}
 
@@ -114,7 +114,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 							"type":    message.Type,
 						})
 						if err != nil {
-							handleInternalServerError(err, w)
+							log.Println("JOIN message:", err)
 							return
 						}
 					case <-leaveChan:

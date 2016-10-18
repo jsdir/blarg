@@ -8,6 +8,6 @@ import Room from 'handlers/Room'
 export default (
   <Route path="/" component={App}>
     <IndexRoute component={Home} />
-    <Route path="/:username" component={Room} />
+    <Route path="/:userId" component={Room} />
   </Route>
 )

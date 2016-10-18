@@ -1,6 +1,7 @@
 package main
 
 import "errors"
+import "fmt"
 
 type RoomMessage struct {
 	Type    string
@@ -153,6 +154,7 @@ func (s *LocalState) Subscribe(roomId string) (chan RoomMessage, chan bool) {
 	go func() {
 		<-cancelChan
 		delete(room.subscribers, messages)
+		s.rooms[roomId] = room
 	}()
 
 	return messages, cancelChan
@@ -165,7 +167,9 @@ func (s *LocalState) broadcast(roomId string, message RoomMessage) {
 		return
 	}
 
-	for subscriber := range room.subscribers {
-		subscriber <- message
-	}
+	fmt.Printf("%+v\n", room)
+	// for subscriber := range room.subscribers {
+	// 	fmt.Println("sending message: %#v", message)
+	// 	subscriber <- message
+	// }
 }

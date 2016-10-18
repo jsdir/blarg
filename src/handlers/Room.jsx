@@ -13,7 +13,7 @@ class Room extends Component {
 
   static propTypes = {
     params: PropTypes.shape({
-      username: PropTypes.string.isRequired,
+      userId: PropTypes.string.isRequired,
     }).isRequired,
     join: PropTypes.func.isRequired,
     leave: PropTypes.func.isRequired,
@@ -25,14 +25,14 @@ class Room extends Component {
       comments: PropTypes.array.isRequired,
     }),
     rooms: PropTypes.shape({
-      user: PropTypes.any,
+      userId: PropTypes.string,
     }).isRequired,
     addComment: PropTypes.func.isRequired,
   }
 
   componentWillMount() {
-    const { username } = this.props.params
-    this.props.join(username)
+    const { userId } = this.props.params
+    this.props.join(userId)
   }
 
   componentWillUnmount() {
@@ -52,7 +52,7 @@ class Room extends Component {
           />
         </div>
         <Comments
-          user={this.props.rooms.user}
+          userId={this.props.rooms.userId}
           comments={room.comments}
           onAddComment={this.props.addComment}
         />
@@ -72,7 +72,7 @@ const defaultRoom = {
 export default connect(
   ({ rooms }, props) => ({
     rooms,
-    room: rooms.rooms[props.params.username]
+    room: rooms.rooms[props.params.userId]
       || defaultRoom,
   }), {
     join,

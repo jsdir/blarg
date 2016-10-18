@@ -4,7 +4,6 @@
 import { handleError } from 'actions'
 import {
   CONNECT_FEED,
-  DISCONNECT_FEED,
   JOIN,
   LEAVE,
   ADD_COMMENT,
@@ -33,14 +32,10 @@ const connectionMiddleware = ({
         )
       }
       break
-    case DISCONNECT_FEED:
-      connection.close()
-      connection = null
-      break
     case ADD_COMMENT:
     case JOIN:
     case LEAVE:
-      connection.send(JSON.stringify(action))
+      // connection.send(JSON.stringify(action))
       break
     default:
       break
