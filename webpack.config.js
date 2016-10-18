@@ -28,11 +28,11 @@ module.exports = {
     }),
     !isProduction && new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
-      API_BASE_URL: JSON.stringify(process.env.isProduction
+      API_BASE_URL: JSON.stringify(isProduction
         ? 'https://blarg-im.herokuapp.com/v1'
         : 'http://localhost:8000/v1'
       ),
-      WS_URL: JSON.stringify(process.env.isProduction
+      WS_URL: JSON.stringify(isProduction
         ? 'ws://blarg-im.herokuapp.com/v1/ws'
         : 'ws://localhost:8000/v1/ws'
       ),
