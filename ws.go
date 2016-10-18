@@ -84,15 +84,9 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 	for {
 		var message RoomMessage
 		if err := conn.ReadJSON(&message); err != nil {
-			// leaveChan <- true
-			log.Println(err)
-			// TODO: ignore close errors
-			// Leave all the current channel if the connection is closed.
-			// if websocket. .IsCloseError(err) {
-			// 	log.Println(err)
-			// 	// handleInternalServerError(err, w)
-			// }
-			// leave <- true
+			if !websocket.IsCloseError(err) {
+				log.Println(err)
+			}
 			return
 		}
 
@@ -105,8 +99,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			// Send the initial payload on join.
 			roomData := getMessage(ROOM_DATA, room.ToJSON())
 			if err = conn.WriteJSON(roomData); err != nil {
-				// TODO: leave <- true
-				// handleInternalServerError(err, w)
+				handleInternalServerError(err, w)
 				return
 			}
 
@@ -121,7 +114,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 							"type":    message.Type,
 						})
 						if err != nil {
-							// TODO: errch <- err
+							handleInternalServerError(err, w)
 							return
 						}
 					case <-leaveChan:
@@ -153,8 +146,4 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-
-	// TODO: stopch <- true
-	// TODO: handle errors (ignore)
-	// TODO: if an EOF, manually call leave if userId and currentRoomId
 }

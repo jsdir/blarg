@@ -32,7 +32,8 @@
 		},
 		{
 			"ImportPath": "github.com/gorilla/websocket",
-			"Rev": "361d4c0ffd78338ebe0a9e6320cdbe115d7dc026"
+			"Comment": "v1.0.0-26-g8003df8",
+			"Rev": "8003df83eef3a5d5301beb970356755128810563"
 		},
 		{
 			"ImportPath": "github.com/rs/cors",

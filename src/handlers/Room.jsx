@@ -21,6 +21,7 @@ class Room extends Component {
       title: PropTypes.string.isRequired,
       viewers: PropTypes.arrayOf(PropTypes.string).isRequired,
       totalViewers: PropTypes.number.isRequired,
+      activeViewers: PropTypes.number.isRequired,
       comments: PropTypes.array.isRequired,
     }),
     rooms: PropTypes.shape({
@@ -47,6 +48,7 @@ class Room extends Component {
           <Viewers
             viewers={room.viewers}
             totalViewers={room.totalViewers}
+            activeViewers={room.activeViewers}
           />
         </div>
         <Comments
@@ -64,6 +66,7 @@ const defaultRoom = {
   title: 'untitled room',
   viewers: [],
   totalViewers: 0,
+  activeViewers: 0,
 }
 
 export default connect(

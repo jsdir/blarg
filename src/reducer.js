@@ -63,6 +63,7 @@ const roomsReducer = handleActions({
     rooms: {
       [state.activeRoomId]: {
         totalViewers: { $apply: incr },
+        activeViewers: { $apply: incr },
         ...(action.payload && {
           viewers: { $push: [action.payload] },
         }),
@@ -72,7 +73,7 @@ const roomsReducer = handleActions({
   [USER_LEFT]: (state, action) => update(state, {
     rooms: {
       [state.activeRoomId]: {
-        totalViewers: { $apply: decr },
+        activeViewers: { $apply: decr },
         ...(action.payload && {
           viewers: { $apply: v => v.filter(vv => vv !== action.payload) },
         }),

@@ -8,6 +8,7 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/tls"
+	"encoding/base64"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -21,6 +22,8 @@ import (
 // ErrBadHandshake is returned when the server response to opening handshake is
 // invalid.
 var ErrBadHandshake = errors.New("websocket: bad handshake")
+
+var errInvalidCompression = errors.New("websocket: invalid compression negotiation")
 
 // NewClient creates a new client connection using the given net connection.
 // The URL u specifies the host and request URI. Use requestHeader to specify
@@ -69,6 +72,12 @@ type Dialer struct {
 
 	// Subprotocols specifies the client's requested subprotocols.
 	Subprotocols []string
+
+	// EnableCompression specifies if the client should attempt to negotiate
+	// per message compression (RFC 7692). Setting this value to true does not
+	// guarantee that compression will be supported. Currently only "no context
+	// takeover" modes are supported.
+	EnableCompression bool
 }
 
 var errMalformedURL = errors.New("malformed ws or wss URL")
@@ -95,12 +104,19 @@ func parseURL(s string) (*url.URL, error) {
 		return nil, errMalformedURL
 	}
 
-	u.Host = s
-	u.Opaque = "/"
-	if i := strings.Index(s, "/"); i >= 0 {
-		u.Host = s[:i]
-		u.Opaque = s[i:]
+	if i := strings.Index(s, "?"); i >= 0 {
+		u.RawQuery = s[i+1:]
+		s = s[:i]
 	}
+
+	if i := strings.Index(s, "/"); i >= 0 {
+		u.Opaque = s[i:]
+		s = s[:i]
+	} else {
+		u.Opaque = "/"
+	}
+
+	u.Host = s
 
 	if strings.Contains(u.Host, "@") {
 		// Don't bother parsing user information because user information is
@@ -206,11 +222,16 @@ func (d *Dialer) Dial(urlStr string, requestHeader http.Header) (*Conn, *http.Re
 			k == "Connection" ||
 			k == "Sec-Websocket-Key" ||
 			k == "Sec-Websocket-Version" ||
+			k == "Sec-Websocket-Extensions" ||
 			(k == "Sec-Websocket-Protocol" && len(d.Subprotocols) > 0):
 			return nil, nil, errors.New("websocket: duplicate header not allowed: " + k)
 		default:
 			req.Header[k] = vs
 		}
+	}
+
+	if d.EnableCompression {
+		req.Header.Set("Sec-Websocket-Extensions", "permessage-deflate; server_no_context_takeover; client_no_context_takeover")
 	}
 
 	hostPort, hostNoPort := hostPortNoPort(u)
@@ -258,11 +279,19 @@ func (d *Dialer) Dial(urlStr string, requestHeader http.Header) (*Conn, *http.Re
 	}
 
 	if proxyURL != nil {
+		connectHeader := make(http.Header)
+		if user := proxyURL.User; user != nil {
+			proxyUser := user.Username()
+			if proxyPassword, passwordSet := user.Password(); passwordSet {
+				credential := base64.StdEncoding.EncodeToString([]byte(proxyUser + ":" + proxyPassword))
+				connectHeader.Set("Proxy-Authorization", "Basic "+credential)
+			}
+		}
 		connectReq := &http.Request{
 			Method: "CONNECT",
 			URL:    &url.URL{Opaque: hostPort},
 			Host:   hostPort,
-			Header: make(http.Header),
+			Header: connectHeader,
 		}
 
 		connectReq.Write(netConn)
@@ -282,12 +311,8 @@ func (d *Dialer) Dial(urlStr string, requestHeader http.Header) (*Conn, *http.Re
 	}
 
 	if u.Scheme == "https" {
-		cfg := d.TLSClientConfig
-		if cfg == nil {
-			cfg = &tls.Config{ServerName: hostNoPort}
-		} else if cfg.ServerName == "" {
-			shallowCopy := *cfg
-			cfg = &shallowCopy
+		cfg := cloneTLSConfig(d.TLSClientConfig)
+		if cfg.ServerName == "" {
 			cfg.ServerName = hostNoPort
 		}
 		tlsConn := tls.Client(netConn, cfg)
@@ -325,10 +350,53 @@ func (d *Dialer) Dial(urlStr string, requestHeader http.Header) (*Conn, *http.Re
 		return nil, resp, ErrBadHandshake
 	}
 
+	for _, ext := range parseExtensions(req.Header) {
+		if ext[""] != "permessage-deflate" {
+			continue
+		}
+		_, snct := ext["server_no_context_takeover"]
+		_, cnct := ext["client_no_context_takeover"]
+		if !snct || !cnct {
+			return nil, resp, errInvalidCompression
+		}
+		conn.newCompressionWriter = compressNoContextTakeover
+		conn.newDecompressionReader = decompressNoContextTakeover
+		break
+	}
+
 	resp.Body = ioutil.NopCloser(bytes.NewReader([]byte{}))
 	conn.subprotocol = resp.Header.Get("Sec-Websocket-Protocol")
 
 	netConn.SetDeadline(time.Time{})
 	netConn = nil // to avoid close in defer.
 	return conn, resp, nil
+}
+
+// cloneTLSConfig clones all public fields except the fields
+// SessionTicketsDisabled and SessionTicketKey. This avoids copying the
+// sync.Mutex in the sync.Once and makes it safe to call cloneTLSConfig on a
+// config in active use.
+func cloneTLSConfig(cfg *tls.Config) *tls.Config {
+	if cfg == nil {
+		return &tls.Config{}
+	}
+	return &tls.Config{
+		Rand:                     cfg.Rand,
+		Time:                     cfg.Time,
+		Certificates:             cfg.Certificates,
+		NameToCertificate:        cfg.NameToCertificate,
+		GetCertificate:           cfg.GetCertificate,
+		RootCAs:                  cfg.RootCAs,
+		NextProtos:               cfg.NextProtos,
+		ServerName:               cfg.ServerName,
+		ClientAuth:               cfg.ClientAuth,
+		ClientCAs:                cfg.ClientCAs,
+		InsecureSkipVerify:       cfg.InsecureSkipVerify,
+		CipherSuites:             cfg.CipherSuites,
+		PreferServerCipherSuites: cfg.PreferServerCipherSuites,
+		ClientSessionCache:       cfg.ClientSessionCache,
+		MinVersion:               cfg.MinVersion,
+		MaxVersion:               cfg.MaxVersion,
+		CurvePreferences:         cfg.CurvePreferences,
+	}
 }

@@ -13,11 +13,12 @@ type Comment struct {
 }
 
 type Room struct {
-	title        string
-	comments     []Comment
-	totalViewers int64
-	viewers      map[string]bool
-	subscribers  map[chan RoomMessage]bool
+	title         string
+	comments      []Comment
+	totalViewers  int64
+	activeViewers int64
+	viewers       map[string]bool
+	subscribers   map[chan RoomMessage]bool
 }
 
 var noRoomError = errors.New("room not found")
@@ -29,10 +30,11 @@ func (r *Room) ToJSON() map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"title":        r.title,
-		"viewers":      viewerIds,
-		"totalViewers": r.totalViewers,
-		"comments":     r.comments,
+		"title":         r.title,
+		"viewers":       viewerIds,
+		"totalViewers":  r.totalViewers,
+		"activeViewers": r.activeViewers,
+		"comments":      r.comments,
 	}
 }
 
@@ -60,7 +62,7 @@ func (s *LocalState) Join(roomId string, userId string) *Room {
 	room, ok := s.rooms[roomId]
 	if !ok {
 		room = Room{
-			title:       userId + "'s Room",
+			title:       roomId + "'s Room",
 			viewers:     make(map[string]bool),
 			comments:    []Comment{},
 			subscribers: map[chan RoomMessage]bool{},
@@ -74,6 +76,7 @@ func (s *LocalState) Join(roomId string, userId string) *Room {
 	// TODO: use unique ips for unauthenticated users.
 	// use redis HyperLogLogs?
 	room.totalViewers += 1
+	room.activeViewers += 1
 
 	s.broadcast(roomId, RoomMessage{
 		Type:    USER_JOINED,
@@ -92,6 +95,7 @@ func (s *LocalState) Leave(roomId string, userId string) {
 	}
 
 	delete(room.viewers, userId)
+	room.activeViewers -= 1
 	s.rooms[roomId] = room
 
 	s.broadcast(roomId, RoomMessage{
