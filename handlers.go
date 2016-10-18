@@ -132,3 +132,21 @@ func (s *Server) HandleCallback(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, s.ClientBaseUrl+"/"+username, 302)
 }
+
+func (s *Server) HandleLogout(w http.ResponseWriter, r *http.Request) {
+	session, err := s.RediStore.Get(r, sessionPrefix)
+	if err != nil {
+		handleInternalServerError(err, w)
+		return
+	}
+
+	delete(session.Values, usernameKey)
+	delete(session.Values, tokenCredKey)
+
+	if err := session.Save(r, w); err != nil {
+		handleInternalServerError(err, w)
+		return
+	}
+
+	http.Redirect(w, r, s.ClientBaseUrl+"/", 302)
+}
