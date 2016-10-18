@@ -53,6 +53,11 @@
 			"Rev": "e355964ac565b94cf0fc7f218346626529125086"
 		},
 		{
+			"ImportPath": "goji.io/middleware",
+			"Comment": "v1.0-7-ge355964",
+			"Rev": "e355964ac565b94cf0fc7f218346626529125086"
+		},
+		{
 			"ImportPath": "goji.io/pat",
 			"Comment": "v1.0-7-ge355964",
 			"Rev": "e355964ac565b94cf0fc7f218346626529125086"
