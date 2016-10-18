@@ -1,5 +1,5 @@
 ### Go ###
-# Compiled Object files, Static and Dynamic libs (Shared 
+# Compiled Object files, Static and Dynamic libs (Shared
 Objects)
 *.o
 *.a
@@ -25,10 +25,26 @@ _testmain.go
 *.test
 *.prof
 
-# Output of the go coverage tool, specifically when used with 
+# Output of the go coverage tool, specifically when used with
 LiteIDE
 *.out
 
 /blarg-api
 /scripts/dev_env.sh
 /scripts/prod_env.sh
+
+# client
+
+# Dependency directory
+# https://docs.npmjs.com/misc/faq#should-i-check-my-node-modules-folder-into-git
+node_modules
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+npm-debug.log*
+
+dist
