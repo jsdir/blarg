@@ -1,0 +1,51 @@
+{
+  "name": "blarg-client",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "build": "BLARG_ENV=production node_modules/.bin/webpack && cp -r static/* dist",
+    "deploy": "aws s3 cp ./dist s3://blarg.im --recursive"
+  },
+  "author": "Jason Sommer <j@jsdir.net>",
+  "license": "MIT",
+  "description": "",
+  "devDependencies": {
+    "babel-core": "^6.3.26",
+    "babel-eslint": "^7.0.0",
+    "babel-loader": "^6.2.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-flow-strip-types": "^6.8.0",
+    "babel-polyfill": "^6.3.14",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-react": "^6.3.13",
+    "babel-preset-stage-0": "^6.3.13",
+    "babel-root-import": "^4.1.3",
+    "css-loader": "^0.23.1",
+    "eslint": "^3.7.0",
+    "eslint-config-airbnb": "^12.0.0",
+    "eslint-import-resolver-webpack": "^0.5.1",
+    "eslint-loader": "^1.5.0",
+    "eslint-plugin-import": "^1.13.0",
+    "eslint-plugin-jsx-a11y": "^2.1.0",
+    "eslint-plugin-react": "^6.0.0",
+    "node-sass": "^3.4.2",
+    "react-hot-loader": "^1.3.0",
+    "sass-loader": "^3.1.2",
+    "style-loader": "^0.13.0",
+    "webpack": "^1.13.2",
+    "webpack-dev-server": "^1.16.1"
+  },
+  "dependencies": {
+    "history": "^4.3.0",
+    "react": "^15.3.2",
+    "react-addons-update": "^15.3.2",
+    "react-dom": "^15.3.2",
+    "react-redux": "^4.4.5",
+    "react-router": "^2.8.1",
+    "redux": "^3.6.0",
+    "redux-actions": "^0.12.0",
+    "redux-router": "^2.1.2"
+  }
+}

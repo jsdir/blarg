@@ -1,0 +1,126 @@
+@import "normalize";
+
+// colors
+
+$white: #fafafa;
+$light-grey: #777;
+$grey: #444;
+$dark-grey: #222;
+$base-color: $white;
+
+// constants
+
+$large: 1.5em;
+$horizontal-spacing: 20px;
+
+// tags
+
+h1, h2, h3, h4, h5, p {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
+  color: $base-color;
+  background-color: $dark-grey;
+}
+
+a {
+  color: $base-color;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+input {
+  padding: 9px;
+  outline: none;
+  border: none;
+
+  &:not(.u-bare) {
+    /* border: 1px solid $subtle-grey-color; */
+
+    /* &:focus { */
+    /*   border-color: $blue-color; */
+    /*   box-shadow: 0 0 1px 2px rgba($blue-color, 0.25); */
+    /* } */
+  }
+}
+
+// components
+
+.Room {
+
+  &__title {
+    font-size: $large;
+    margin-right: $horizontal-spacing;
+  }
+
+  &__header {
+    $height: 60px;
+    line-height: $height;
+    vertical-align: middle;
+    height: $height;
+    border-bottom: 1px solid $grey;
+    padding-left: $horizontal-spacing;
+
+    .User__icon {
+      vertical-align: middle;
+    }
+  }
+}
+
+.Viewers {
+  display: inline;
+
+  &__count {
+    border: 1px solid $light-grey;
+    border-radius: 6px;
+    padding: 7px;
+    margin-right: $horizontal-spacing;
+
+    .Icon {
+      margin-right: 4px;
+    }
+  }
+}
+
+.Comments {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background-color: $dark-grey;
+  border-left: 1px solid $grey;
+  width: 300px;
+
+  &__title {
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: 600;
+  }
+
+  &__input {
+    bottom: 0;
+    right: 0;
+    left: 0;
+    position: absolute;
+
+    input {
+      width: 100%;
+      padding: 15px;
+      background-color: $grey;
+      color: $white;
+    }
+  }
+}
+
+.User{
+
+  &__icon {
+    border-radius: 3px;
+  }
+}
