@@ -33,7 +33,7 @@ module.exports = {
         : 'http://localhost:8000/v1'
       ),
       WS_URL: JSON.stringify(isProduction
-        ? 'ws://blarg-im.herokuapp.com/v1/ws'
+        ? 'wss://blarg-im.herokuapp.com/v1/ws'
         : 'ws://localhost:8000/v1/ws'
       ),
     }),

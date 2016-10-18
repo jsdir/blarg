@@ -1,5 +1,5 @@
 /* eslint-env browser */
-/* global API_BASE_URL */
+/* global WS_URL */
 
 import { handleError } from 'actions'
 import {
@@ -22,8 +22,7 @@ const connectionMiddleware = ({
 }) => (next) => (action) => {
   switch (action.type) {
     case CONNECT_FEED:
-      // TODO: ${API_BASE_URL}
-      connection = new WebSocket('ws://localhost:8000/v1/ws')
+      connection = new WebSocket(WS_URL)
       connection.onerror = (error) => {
         dispatch(handleError(error))
       }
