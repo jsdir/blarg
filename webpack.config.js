@@ -3,7 +3,7 @@ const path = require('path')
 const webpack = require('webpack')
 const unixFormatter = require('eslint/lib/formatters/unix')
 
-const isProduction = process.env.BLARG_ENV === 'production'
+const isProduction = process.env.NODE_ENV === 'production'
 
 module.exports = {
   devtool: 'eval',
@@ -28,9 +28,13 @@ module.exports = {
     }),
     !isProduction && new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
-      API_BASE_URL: JSON.stringify(process.env.BLARG_LOCAL_API
-        ? 'http://localhost:8000/v1'
-        : 'https://api.blarg.im/v1'
+      API_BASE_URL: JSON.stringify(process.env.isProduction
+        ? 'https://blarg-im.herokuapp.com/v1'
+        : 'http://localhost:8000/v1'
+      ),
+      WS_URL: JSON.stringify(process.env.isProduction
+        ? 'ws://blarg-im.herokuapp.com/v1/ws'
+        : 'ws://localhost:8000/v1/ws'
       ),
     }),
   ]),
