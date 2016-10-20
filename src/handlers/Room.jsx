@@ -41,6 +41,8 @@ class Room extends Component {
 
   render() {
     const { room } = this.props
+    const userId = this.props.rooms.userId
+
     return (
       <div className="Room">
         <div className="Room__header">
@@ -50,9 +52,10 @@ class Room extends Component {
             totalViewers={room.totalViewers}
             activeViewers={room.activeViewers}
           />
+          {userId && (<a href="/v1/logout">Logout</a>)}
         </div>
         <Comments
-          userId={this.props.rooms.userId}
+          userId={userId}
           comments={room.comments}
           onAddComment={this.props.addComment}
         />

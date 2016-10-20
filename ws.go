@@ -8,7 +8,6 @@ import (
 )
 
 const (
-	AUTH         = "AUTH"
 	JOIN         = "JOIN"
 	LEAVE        = "LEAVE"
 	ADD_COMMENT  = "ADD_COMMENT"
@@ -48,41 +47,25 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Send an initial payload message.
-	message := map[string]interface{}{
-		"type":    AUTH,
-		"payload": nil,
-	}
-
 	userId := ""
 	if session.Values[tokenCredKey] != nil {
 		userId = session.Values[usernameKey].(string)
-		message["payload"] = map[string]interface{}{
-			"username": userId,
-		}
-	}
-
-	err = conn.WriteJSON(message)
-	if err != nil {
-		handleInternalServerError(err, w)
-		return
 	}
 
 	// Only one room available per connection.
 	currentRoomId := ""
+	var roomMessages chan StateMessage
 
-	leaveChan := make(chan bool)
 	leave := func() {
 		if currentRoomId != "" {
-			leaveChan <- true
-			s.State.Leave(currentRoomId, userId)
+			s.State.Leave(currentRoomId, userId, roomMessages)
 		}
 	}
 	defer leave()
 
 	// Receive messages
 	for {
-		var message RoomMessage
+		var message StateMessage
 		if err := conn.ReadJSON(&message); err != nil {
 			if !websocket.IsCloseError(err, websocket.CloseGoingAway) {
 				log.Println("read error:", err)
@@ -99,30 +82,31 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			// Send the initial payload on join.
 			roomData := getMessage(ROOM_DATA, room.ToJSON())
 			if err = conn.WriteJSON(roomData); err != nil {
-				log.Println("JOIN:", err)
+				log.Println("join error:", err)
 				return
 			}
 
-			// Subscribe to any changes in the room.
-			messages, cancelChan := s.State.Subscribe(currentRoomId)
+			roomMessages = s.State.SubscribeRoom(currentRoomId)
+
 			go func() {
 				for {
-					select {
-					case message := <-messages:
-						err = conn.WriteJSON(map[string]interface{}{
-							"payload": message.Payload,
-							"type":    message.Type,
-						})
-						if err != nil {
-							log.Println("JOIN message:", err)
-							return
-						}
-					case <-leaveChan:
-						cancelChan <- true
+					message := <-roomMessages
+					if message.End {
 						return
+					}
+
+					err = conn.WriteJSON(map[string]interface{}{
+						"payload": message.Payload,
+						"type":    message.Type,
+					})
+					if err != nil {
+						log.Println("send error:", err)
 					}
 				}
 			}()
+
+		case LEAVE:
+			leave()
 
 		case ADD_COMMENT:
 			// Checks that:

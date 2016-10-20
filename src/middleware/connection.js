@@ -10,6 +10,15 @@ import {
 } from 'constants'
 
 let connection
+const messages = []
+
+const send = data => {
+  if (connection.readyState === 1) {
+    connection.send(data)
+  } else {
+    messages.push(data)
+  }
+}
 
 const handleConnectionEvent = (event, data, dispatch) => dispatch({
   type: event,
@@ -31,11 +40,14 @@ const connectionMiddleware = ({
           data.type, data.payload, dispatch
         )
       }
+      connection.onopen = () => {
+        messages.forEach(message => connection.send(message))
+      }
       break
     case ADD_COMMENT:
     case JOIN:
     case LEAVE:
-      // connection.send(JSON.stringify(action))
+      send(JSON.stringify(action))
       break
     default:
       break

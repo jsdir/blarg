@@ -1,11 +1,11 @@
 package main
 
 import "errors"
-import "fmt"
 
-type RoomMessage struct {
+type StateMessage struct {
 	Type    string
 	Payload interface{}
+	End     bool
 }
 
 type Comment struct {
@@ -19,7 +19,7 @@ type Room struct {
 	totalViewers  int64
 	activeViewers int64
 	viewers       map[string]bool
-	subscribers   map[chan RoomMessage]bool
+	subscribers   map[chan StateMessage]bool
 }
 
 var noRoomError = errors.New("room not found")
@@ -42,11 +42,11 @@ func (r *Room) ToJSON() map[string]interface{} {
 type State interface {
 	// userId is "" if the user is unauthenticated
 	Join(roomId string, userId string) *Room
+	SubscribeRoom(roomId string) chan StateMessage
 	// userId is "" if the user is unauthenticated
-	Leave(roomId string, userId string)
+	Leave(roomId string, userId string, messages chan StateMessage)
 	AddComment(roomId string, comment Comment)
 	ChangeRoomTitle(roomId string, title string)
-	Subscribe(roomId string) (chan RoomMessage, chan bool)
 }
 
 type LocalState struct {
@@ -66,7 +66,7 @@ func (s *LocalState) Join(roomId string, userId string) *Room {
 			title:       roomId + "'s Room",
 			viewers:     make(map[string]bool),
 			comments:    []Comment{},
-			subscribers: map[chan RoomMessage]bool{},
+			subscribers: map[chan StateMessage]bool{},
 		}
 	}
 
@@ -79,7 +79,7 @@ func (s *LocalState) Join(roomId string, userId string) *Room {
 	room.totalViewers += 1
 	room.activeViewers += 1
 
-	s.broadcast(roomId, RoomMessage{
+	s.broadcast(roomId, StateMessage{
 		Type:    USER_JOINED,
 		Payload: userId,
 	})
@@ -89,17 +89,31 @@ func (s *LocalState) Join(roomId string, userId string) *Room {
 	return &room
 }
 
-func (s *LocalState) Leave(roomId string, userId string) {
+func (s *LocalState) SubscribeRoom(roomId string) chan StateMessage {
+	room, ok := s.rooms[roomId]
+	if !ok {
+		return nil
+	}
+
+	messages := make(chan StateMessage)
+	room.subscribers[messages] = true
+
+	return messages
+}
+
+func (s *LocalState) Leave(roomId string, userId string, messages chan StateMessage) {
 	room, ok := s.rooms[roomId]
 	if !ok {
 		return
 	}
 
+	messages <- StateMessage{End: true}
 	delete(room.viewers, userId)
+	delete(room.subscribers, messages)
 	room.activeViewers -= 1
 	s.rooms[roomId] = room
 
-	s.broadcast(roomId, RoomMessage{
+	s.broadcast(roomId, StateMessage{
 		Type:    USER_LEFT,
 		Payload: userId,
 	})
@@ -114,7 +128,7 @@ func (s *LocalState) AddComment(roomId string, comment Comment) {
 	room.comments = append(room.comments, comment)
 	s.rooms[roomId] = room
 
-	s.broadcast(roomId, RoomMessage{
+	s.broadcast(roomId, StateMessage{
 		Type: COMMENT_ADDED,
 		Payload: map[string]interface{}{
 			"text":     comment.Text,
@@ -132,44 +146,19 @@ func (s *LocalState) ChangeRoomTitle(roomId string, title string) {
 	room.title = title
 	s.rooms[roomId] = room
 
-	s.broadcast(roomId, RoomMessage{
+	s.broadcast(roomId, StateMessage{
 		Type:    CHANGE_TITLE,
 		Payload: title,
 	})
 }
 
-func (s *LocalState) Subscribe(roomId string) (chan RoomMessage, chan bool) {
-	room, ok := s.rooms[roomId]
-	if !ok {
-		return nil, nil
-	}
-
-	messages := make(chan RoomMessage)
-	room.subscribers[messages] = true
-
-	s.rooms[roomId] = room
-
-	cancelChan := make(chan bool)
-
-	go func() {
-		<-cancelChan
-		delete(room.subscribers, messages)
-		s.rooms[roomId] = room
-	}()
-
-	return messages, cancelChan
-
-}
-
-func (s *LocalState) broadcast(roomId string, message RoomMessage) {
+func (s *LocalState) broadcast(roomId string, message StateMessage) {
 	room, ok := s.rooms[roomId]
 	if !ok {
 		return
 	}
 
-	fmt.Printf("%+v\n", room)
-	// for subscriber := range room.subscribers {
-	// 	fmt.Println("sending message: %#v", message)
-	// 	subscriber <- message
-	// }
+	for subscriber := range room.subscribers {
+		subscriber <- message
+	}
 }
