@@ -7,6 +7,7 @@ import {
   JOIN,
   LEAVE,
   ADD_COMMENT,
+  CHANGE_TITLE,
 } from 'constants'
 
 let connection
@@ -47,6 +48,7 @@ const connectionMiddleware = ({
     case ADD_COMMENT:
     case JOIN:
     case LEAVE:
+    case CHANGE_TITLE:
       send(JSON.stringify(action))
       break
     default:

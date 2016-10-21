@@ -9,14 +9,7 @@ import Icon from 'components/Icon'
 class Home extends Component {
 
   static propTypes = {
-    authenticatedUser: PropTypes.shape({
-      username: PropTypes.string.isRequired,
-    }),
-    rooms: PropTypes.shape({
-      user: PropTypes.shape({
-        username: PropTypes.string.isRequired,
-      }),
-    }).isRequired,
+    userId: PropTypes.string,
   }
 
   static contextTypes = {
@@ -25,10 +18,10 @@ class Home extends Component {
 
   componentWillMount() {
     // If the user is authenticated, immediately redirect to their room.
-    const { user } = this.props.rooms
+    const { userId } = this.props
 
-    if (user) {
-      this.context.router.replace(user.username)
+    if (userId) {
+      this.context.router.replace(userId)
     }
   }
 
@@ -47,5 +40,5 @@ class Home extends Component {
 }
 
 export default connect(
-  ({ rooms }) => ({ rooms })
+  ({ user }) => ({ userId: user.id })
 )(Home)

@@ -58,7 +58,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 
 	leave := func() {
 		if currentRoomId != "" {
-			s.State.Leave(currentRoomId, userId, roomMessages)
+			s.State.Leave(currentRoomId, roomMessages, userId)
 		}
 	}
 	defer leave()
@@ -77,7 +77,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 		case JOIN:
 			leave()
 			currentRoomId = message.Payload.(string)
-			room := s.State.Join(currentRoomId, userId)
+			room := s.State.Join(currentRoomId, roomMessages, userId)
 
 			// Send the initial payload on join.
 			roomData := getMessage(ROOM_DATA, room.ToJSON())
@@ -113,7 +113,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			// 1. A room is already loaded.
 			// 2. The user is authenticated.
 			if currentRoomId != "" && userId != "" {
-				s.State.AddComment(currentRoomId, Comment{
+				s.State.AddComment(currentRoomId, roomMessages, Comment{
 					SenderId: userId,
 					Text:     message.Payload.(string),
 				})
@@ -126,7 +126,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			// 3. The user is the host.
 			if currentRoomId != "" && userId != "" && currentRoomId == userId {
 				title := message.Payload.(string)
-				s.State.ChangeRoomTitle(currentRoomId, title)
+				s.State.ChangeRoomTitle(currentRoomId, roomMessages, title)
 			}
 		}
 	}

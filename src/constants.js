@@ -12,3 +12,5 @@ export const ROOM_DATA = 'ROOM_DATA'
 
 export const HANDLE_ERROR = 'HANDLE_ERROR'
 export const COMMENT_ADDED = 'COMMENT_ADDED'
+
+export const CHANGE_TITLE = 'CHANGE_TITLE'

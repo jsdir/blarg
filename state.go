@@ -3,9 +3,10 @@ package main
 import "errors"
 
 type StateMessage struct {
-	Type    string
-	Payload interface{}
-	End     bool
+	Type     string
+	Payload  interface{}
+	SenderId string
+	End      bool
 }
 
 type Comment struct {
@@ -41,12 +42,12 @@ func (r *Room) ToJSON() map[string]interface{} {
 
 type State interface {
 	// userId is "" if the user is unauthenticated
-	Join(roomId string, userId string) *Room
+	Join(roomId string, skip chan StateMessage, userId string) *Room
 	SubscribeRoom(roomId string) chan StateMessage
 	// userId is "" if the user is unauthenticated
-	Leave(roomId string, userId string, messages chan StateMessage)
-	AddComment(roomId string, comment Comment)
-	ChangeRoomTitle(roomId string, title string)
+	Leave(roomId string, skip chan StateMessage, userId string)
+	AddComment(roomId string, skip chan StateMessage, comment Comment)
+	ChangeRoomTitle(roomId string, messages chan StateMessage, title string)
 }
 
 type LocalState struct {
@@ -59,7 +60,7 @@ func NewLocalState() LocalState {
 	}
 }
 
-func (s *LocalState) Join(roomId string, userId string) *Room {
+func (s *LocalState) Join(roomId string, skip chan StateMessage, userId string) *Room {
 	room, ok := s.rooms[roomId]
 	if !ok {
 		room = Room{
@@ -79,7 +80,7 @@ func (s *LocalState) Join(roomId string, userId string) *Room {
 	room.totalViewers += 1
 	room.activeViewers += 1
 
-	s.broadcast(roomId, StateMessage{
+	s.broadcast(roomId, skip, StateMessage{
 		Type:    USER_JOINED,
 		Payload: userId,
 	})
@@ -101,7 +102,7 @@ func (s *LocalState) SubscribeRoom(roomId string) chan StateMessage {
 	return messages
 }
 
-func (s *LocalState) Leave(roomId string, userId string, messages chan StateMessage) {
+func (s *LocalState) Leave(roomId string, messages chan StateMessage, userId string) {
 	room, ok := s.rooms[roomId]
 	if !ok {
 		return
@@ -113,13 +114,13 @@ func (s *LocalState) Leave(roomId string, userId string, messages chan StateMess
 	room.activeViewers -= 1
 	s.rooms[roomId] = room
 
-	s.broadcast(roomId, StateMessage{
+	s.broadcast(roomId, messages, StateMessage{
 		Type:    USER_LEFT,
 		Payload: userId,
 	})
 }
 
-func (s *LocalState) AddComment(roomId string, comment Comment) {
+func (s *LocalState) AddComment(roomId string, skip chan StateMessage, comment Comment) {
 	room, ok := s.rooms[roomId]
 	if !ok {
 		return
@@ -128,7 +129,7 @@ func (s *LocalState) AddComment(roomId string, comment Comment) {
 	room.comments = append(room.comments, comment)
 	s.rooms[roomId] = room
 
-	s.broadcast(roomId, StateMessage{
+	s.broadcast(roomId, skip, StateMessage{
 		Type: COMMENT_ADDED,
 		Payload: map[string]interface{}{
 			"text":     comment.Text,
@@ -137,7 +138,7 @@ func (s *LocalState) AddComment(roomId string, comment Comment) {
 	})
 }
 
-func (s *LocalState) ChangeRoomTitle(roomId string, title string) {
+func (s *LocalState) ChangeRoomTitle(roomId string, messages chan StateMessage, title string) {
 	room, ok := s.rooms[roomId]
 	if !ok {
 		return
@@ -146,19 +147,22 @@ func (s *LocalState) ChangeRoomTitle(roomId string, title string) {
 	room.title = title
 	s.rooms[roomId] = room
 
-	s.broadcast(roomId, StateMessage{
+	s.broadcast(roomId, messages, StateMessage{
 		Type:    CHANGE_TITLE,
 		Payload: title,
 	})
 }
 
-func (s *LocalState) broadcast(roomId string, message StateMessage) {
+func (s *LocalState) broadcast(roomId string, skip chan StateMessage, message StateMessage) {
 	room, ok := s.rooms[roomId]
 	if !ok {
 		return
 	}
 
 	for subscriber := range room.subscribers {
+		if subscriber == skip {
+			continue
+		}
 		subscriber <- message
 	}
 }

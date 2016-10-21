@@ -6,6 +6,7 @@ import {
   LEAVE,
   ADD_COMMENT,
   HANDLE_ERROR,
+  CHANGE_TITLE,
 } from 'constants'
 
 // connectFeed()
@@ -18,3 +19,5 @@ export const leave = createAction(LEAVE)
 export const addComment = createAction(ADD_COMMENT)
 // handleError(error)
 export const handleError = createAction(HANDLE_ERROR)
+// changeTitle(title)
+export const changeTitle = createAction(CHANGE_TITLE)

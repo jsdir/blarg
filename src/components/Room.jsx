@@ -4,49 +4,66 @@ import { connect } from 'react-redux'
 import Viewers from 'components/Viewers'
 import Comments from 'components/Comments'
 import {
-  join,
-  leave,
   addComment,
+  changeTitle,
 } from 'actions'
 
 class Room extends Component {
 
   static propTypes = {
-    params: PropTypes.shape({
-      userId: PropTypes.string.isRequired,
-    }).isRequired,
-    join: PropTypes.func.isRequired,
-    leave: PropTypes.func.isRequired,
+    roomId: PropTypes.string.isRequired,
+    userId: PropTypes.string,
     room: PropTypes.shape({
       title: PropTypes.string.isRequired,
       viewers: PropTypes.arrayOf(PropTypes.string).isRequired,
       totalViewers: PropTypes.number.isRequired,
       activeViewers: PropTypes.number.isRequired,
       comments: PropTypes.array.isRequired,
-    }),
-    rooms: PropTypes.shape({
-      userId: PropTypes.string,
     }).isRequired,
     addComment: PropTypes.func.isRequired,
+    changeTitle: PropTypes.func.isRequired,
   }
 
-  componentWillMount() {
-    const { userId } = this.props.params
-    this.props.join(userId)
+  constructor(...args) {
+    super(...args)
+
+    const { room } = this.props
+    this.state = { title: room.title }
   }
 
-  componentWillUnmount() {
-    this.props.leave()
+  handleChangeTitle = (event) => {
+    this.setState({ title: event.target.value })
+  }
+
+  handleBlurTitle = (event) => {
+    this.props.changeTitle(event.target.value)
+  }
+
+  renderTitle(myRoom) {
+    const { room } = this.props
+
+    return myRoom ? (
+      <input
+        type="text"
+        value={this.state.title}
+        onChange={this.handleChangeTitle}
+        onBlur={this.handleBlurTitle}
+      />
+    ) : (
+      <span>{room.title}</span>
+    )
   }
 
   render() {
-    const { room } = this.props
-    const userId = this.props.rooms.userId
+    const { room, userId, roomId } = this.props
+    const myRoom = userId && userId === roomId
 
     return (
       <div className="Room">
         <div className="Room__header">
-          <span className="Room__title">{room.title}</span>
+          <span className="Room__title">
+            {this.renderTitle(myRoom)}
+          </span>
           <Viewers
             viewers={room.viewers}
             totalViewers={room.totalViewers}
@@ -64,22 +81,9 @@ class Room extends Component {
   }
 }
 
-const defaultRoom = {
-  comments: [],
-  title: 'untitled room',
-  viewers: [],
-  totalViewers: 0,
-  activeViewers: 0,
-}
-
 export default connect(
-  ({ rooms }, props) => ({
-    rooms,
-    room: rooms.rooms[props.params.userId]
-      || defaultRoom,
-  }), {
-    join,
-    leave,
+  ({ user }) => ({ userId: user.id }), {
     addComment,
+    changeTitle,
   }
 )(Room)
