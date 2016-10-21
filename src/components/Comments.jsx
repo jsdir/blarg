@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 
+import User from 'components/User'
 import Username from 'components/Username'
 
 class Comments extends Component {
@@ -28,13 +29,19 @@ class Comments extends Component {
     this.setState({ commentText: '' })
   }
 
-  renderComment = (comment, index) => (
+  renderComment = (comment, index) => (comment.event ? (
     <div key={index}>
+      <Username username={comment.senderId} />
+      {comment.joined ? 'joined' : 'left'}
+    </div>
+  ) : (
+    <div key={index}>
+      <User username={comment.senderId} />
       <Username username={comment.senderId} />
       {' '}
       {comment.text}
     </div>
-  )
+  ))
 
   renderInput() {
     return (

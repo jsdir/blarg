@@ -40,6 +40,11 @@ const roomReducer = handleActions({
     activeViewers: { $set: action.payload.activeViewers },
     ...(action.payload.userId && {
       viewers: { $push: [action.payload.userId] },
+      comments: { $push: [{
+        senderId: action.payload.userId,
+        event: true,
+        joined: true,
+      }] },
     }),
   }),
   [USER_LEFT]: (state, action) => update(state, {
@@ -47,6 +52,11 @@ const roomReducer = handleActions({
     activeViewers: { $set: action.payload.activeViewers },
     ...(action.payload.userId && {
       viewers: { $apply: v => v.filter(vv => vv !== action.payload.userId) },
+      comments: { $push: [{
+        senderId: action.payload.userId,
+        event: true,
+        joined: false,
+      }] },
     }),
   }),
   [CHANGE_TITLE]: changeTitle,
