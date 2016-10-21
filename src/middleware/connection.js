@@ -46,6 +46,13 @@ const connectionMiddleware = ({
       }
       break
     case ADD_COMMENT:
+      send(
+        JSON.stringify({
+          type: action.type,
+          payload: action.payload.text,
+        })
+      )
+      break
     case JOIN:
     case LEAVE:
     case CHANGE_TITLE:

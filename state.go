@@ -15,35 +15,57 @@ type Comment struct {
 }
 
 type Room struct {
-	title         string
-	comments      []Comment
-	totalViewers  int64
-	activeViewers int64
-	viewers       map[string]bool
-	subscribers   map[chan StateMessage]bool
+	title        string
+	comments     []Comment
+	subscribers  map[chan StateMessage]string
+	totalAnons   map[string]bool
+	totalMembers map[string]bool
 }
 
 var noRoomError = errors.New("room not found")
 
 func (r *Room) ToJSON() map[string]interface{} {
-	viewerIds := []string{}
-	for viewerId := range r.viewers {
-		viewerIds = append(viewerIds, viewerId)
+	totalViewers, activeViewers := r.getViewerCounts()
+
+	viewerMap := map[string]bool{}
+	for _, userId := range r.subscribers {
+		if userId != "" {
+			viewerMap[userId] = true
+		}
+	}
+
+	viewers := []string{}
+	for userId, _ := range viewerMap {
+		viewers = append(viewers, userId)
 	}
 
 	return map[string]interface{}{
 		"title":         r.title,
-		"viewers":       viewerIds,
-		"totalViewers":  r.totalViewers,
-		"activeViewers": r.activeViewers,
+		"viewers":       viewers,
+		"totalViewers":  totalViewers,
+		"activeViewers": activeViewers,
 		"comments":      r.comments,
+	}
+}
+
+func (r *Room) getViewerCounts() (int, int) {
+	totalViewers := len(r.totalMembers) + len(r.totalAnons)
+	activeViewers := len(r.subscribers)
+	return totalViewers, activeViewers
+}
+
+func (r *Room) getViewerPayload(userId string) map[string]interface{} {
+	totalViewers, activeViewers := r.getViewerCounts()
+	return map[string]interface{}{
+		"userId":        userId,
+		"totalViewers":  totalViewers,
+		"activeViewers": activeViewers,
 	}
 }
 
 type State interface {
 	// userId is "" if the user is unauthenticated
-	Join(roomId string, skip chan StateMessage, userId string) *Room
-	SubscribeRoom(roomId string) chan StateMessage
+	Join(roomId string, userId string, address string) (*Room, chan StateMessage)
 	// userId is "" if the user is unauthenticated
 	Leave(roomId string, skip chan StateMessage, userId string)
 	AddComment(roomId string, skip chan StateMessage, comment Comment)
@@ -60,46 +82,48 @@ func NewLocalState() LocalState {
 	}
 }
 
-func (s *LocalState) Join(roomId string, skip chan StateMessage, userId string) *Room {
+func (s *LocalState) Join(roomId string, userId string, address string) (*Room, chan StateMessage) {
 	room, ok := s.rooms[roomId]
 	if !ok {
 		room = Room{
-			title:       roomId + "'s Room",
-			viewers:     make(map[string]bool),
-			comments:    []Comment{},
-			subscribers: map[chan StateMessage]bool{},
+			title:        roomId + "'s Room",
+			comments:     []Comment{},
+			subscribers:  map[chan StateMessage]string{},
+			totalAnons:   map[string]bool{},
+			totalMembers: map[string]bool{},
 		}
 	}
 
-	if userId != "" {
-		room.viewers[userId] = true
-	}
-
-	// TODO: use unique ips for unauthenticated users.
-	// use redis HyperLogLogs?
-	room.totalViewers += 1
-	room.activeViewers += 1
-
-	s.broadcast(roomId, skip, StateMessage{
-		Type:    USER_JOINED,
-		Payload: userId,
-	})
-
-	s.rooms[roomId] = room
-
-	return &room
-}
-
-func (s *LocalState) SubscribeRoom(roomId string) chan StateMessage {
-	room, ok := s.rooms[roomId]
-	if !ok {
-		return nil
+	// Only send the leave event for the member if there are no more
+	// subscribers left.
+	alreadyJoined := false
+	for _, id := range room.subscribers {
+		if id == userId {
+			alreadyJoined = true
+			break
+		}
 	}
 
 	messages := make(chan StateMessage)
-	room.subscribers[messages] = true
+	room.subscribers[messages] = userId
+	if userId == "" {
+		room.totalAnons[address] = true
+	} else {
+		room.totalMembers[userId] = true
+	}
 
-	return messages
+	s.rooms[roomId] = room
+
+	if alreadyJoined {
+		userId = ""
+	}
+
+	s.broadcast(roomId, messages, StateMessage{
+		Type:    USER_JOINED,
+		Payload: room.getViewerPayload(userId),
+	})
+
+	return &room, messages
 }
 
 func (s *LocalState) Leave(roomId string, messages chan StateMessage, userId string) {
@@ -109,14 +133,21 @@ func (s *LocalState) Leave(roomId string, messages chan StateMessage, userId str
 	}
 
 	messages <- StateMessage{End: true}
-	delete(room.viewers, userId)
 	delete(room.subscribers, messages)
-	room.activeViewers -= 1
 	s.rooms[roomId] = room
+
+	// Only send the leave event for the member if there are no more
+	// subscribers left.
+	for _, id := range room.subscribers {
+		if id == userId {
+			userId = ""
+			break
+		}
+	}
 
 	s.broadcast(roomId, messages, StateMessage{
 		Type:    USER_LEFT,
-		Payload: userId,
+		Payload: room.getViewerPayload(userId),
 	})
 }
 
@@ -148,7 +179,7 @@ func (s *LocalState) ChangeRoomTitle(roomId string, messages chan StateMessage, 
 	s.rooms[roomId] = room
 
 	s.broadcast(roomId, messages, StateMessage{
-		Type:    CHANGE_TITLE,
+		Type:    TITLE_CHANGED,
 		Payload: title,
 	})
 }
@@ -163,6 +194,7 @@ func (s *LocalState) broadcast(roomId string, skip chan StateMessage, message St
 		if subscriber == skip {
 			continue
 		}
+
 		subscriber <- message
 	}
 }

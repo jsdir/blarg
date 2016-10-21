@@ -14,3 +14,4 @@ export const HANDLE_ERROR = 'HANDLE_ERROR'
 export const COMMENT_ADDED = 'COMMENT_ADDED'
 
 export const CHANGE_TITLE = 'CHANGE_TITLE'
+export const TITLE_CHANGED = 'TITLE_CHANGED'

@@ -15,9 +15,10 @@ const (
 	ROOM_DATA    = "ROOM_DATA"
 
 	// events
-	COMMENT_ADDED = "COMMENT_ADDED"
 	USER_JOINED   = "USER_JOINED"
 	USER_LEFT     = "USER_LEFT"
+	COMMENT_ADDED = "COMMENT_ADDED"
+	TITLE_CHANGED = "TITLE_CHANGED"
 )
 
 var upgrader = websocket.Upgrader{
@@ -77,7 +78,8 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 		case JOIN:
 			leave()
 			currentRoomId = message.Payload.(string)
-			room := s.State.Join(currentRoomId, roomMessages, userId)
+			room, messages := s.State.Join(currentRoomId, userId, r.RemoteAddr)
+			roomMessages = messages
 
 			// Send the initial payload on join.
 			roomData := getMessage(ROOM_DATA, room.ToJSON())
@@ -85,8 +87,6 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 				log.Println("join error:", err)
 				return
 			}
-
-			roomMessages = s.State.SubscribeRoom(currentRoomId)
 
 			go func() {
 				for {

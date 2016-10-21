@@ -39,16 +39,30 @@ class Room extends Component {
     this.props.changeTitle(event.target.value)
   }
 
+  handleSubmit = (event) => {
+    event.preventDefault()
+    this.props.changeTitle(this.state.title)
+  }
+
+  addComment = (text) => {
+    this.props.addComment({
+      text,
+      senderId: this.props.userId,
+    })
+  }
+
   renderTitle(myRoom) {
     const { room } = this.props
 
     return myRoom ? (
-      <input
-        type="text"
-        value={this.state.title}
-        onChange={this.handleChangeTitle}
-        onBlur={this.handleBlurTitle}
-      />
+      <form onSubmit={this.handleSubmit}>
+        <input
+          type="text"
+          value={this.state.title}
+          onChange={this.handleChangeTitle}
+          onBlur={this.handleBlurTitle}
+        />
+      </form>
     ) : (
       <span>{room.title}</span>
     )
@@ -74,7 +88,7 @@ class Room extends Component {
         <Comments
           userId={userId}
           comments={room.comments}
-          onAddComment={this.props.addComment}
+          onAddComment={this.addComment}
         />
       </div>
     )

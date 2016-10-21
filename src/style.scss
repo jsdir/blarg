@@ -90,6 +90,10 @@ input {
   &__title {
     font-size: $large;
     margin-right: $horizontal-spacing;
+
+    form {
+      display: inline;
+    }
   }
 
   &__header {
@@ -110,9 +114,6 @@ input {
   display: inline;
 
   &__count {
-    border: 1px solid $light-grey;
-    border-radius: 6px;
-    padding: 7px;
     margin-right: $horizontal-spacing;
 
     .Icon {

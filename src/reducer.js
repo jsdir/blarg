@@ -13,47 +13,44 @@ import {
   USER_JOINED,
   USER_LEFT,
   CHANGE_TITLE,
+  TITLE_CHANGED,
 } from 'constants'
-
-const incr = v => v + 1
-const decr = v => v - 1
 
 const defaultRoom = {
   loading: true,
   error: null,
 }
 
+const addComment = (state, action) => update(state, {
+  comments: { $push: [action.payload] },
+})
+
+const changeTitle = (state, action) => update(state, {
+  title: { $set: action.payload },
+})
+
 const roomReducer = handleActions({
   [JOIN]: () => defaultRoom,
   [LEAVE]: () => defaultRoom,
-  [ADD_COMMENT]: (state, action) => update(state, {
-    comments: { $push: [{
-      senderId: state.userId,
-      text: action.payload,
-    }] },
-  }),
-  [COMMENT_ADDED]: (state, action) => update(state, {
-    comments: { $push: [action.payload] },
-  }),
+  [ADD_COMMENT]: addComment,
+  [COMMENT_ADDED]: addComment,
   [ROOM_DATA]: (_, action) => action.payload,
   [USER_JOINED]: (state, action) => update(state, {
-    totalViewers: { $apply: incr },
-    activeViewers: { $apply: incr },
-    ...(action.payload && {
-      viewers: { $push: [action.payload] },
+    totalViewers: { $set: action.payload.totalViewers },
+    activeViewers: { $set: action.payload.activeViewers },
+    ...(action.payload.userId && {
+      viewers: { $push: [action.payload.userId] },
     }),
   }),
   [USER_LEFT]: (state, action) => update(state, {
-    activeViewers: { $apply: decr },
-    ...(action.payload && {
-      viewers: { $apply: v => v.filter(vv => vv !== action.payload) },
+    totalViewers: { $set: action.payload.totalViewers },
+    activeViewers: { $set: action.payload.activeViewers },
+    ...(action.payload.userId && {
+      viewers: { $apply: v => v.filter(vv => vv !== action.payload.userId) },
     }),
   }),
-  [CHANGE_TITLE]: (state, action) => update(state, {
-    title: {
-      $set: action.payload,
-    },
-  }),
+  [CHANGE_TITLE]: changeTitle,
+  [TITLE_CHANGED]: changeTitle,
 }, defaultRoom)
 
 const userReducer = (state = {
