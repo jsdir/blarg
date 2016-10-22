@@ -24,7 +24,6 @@ class Comments extends Component {
 
   handleSubmit = (event) => {
     event.preventDefault()
-    // or e.stopPropagation()
     this.props.onAddComment(this.state.commentText)
     this.setState({ commentText: '' })
   }

@@ -7,6 +7,7 @@ import {
   addComment,
   changeTitle,
 } from 'actions'
+import Username from 'components/Username'
 
 class Room extends Component {
 
@@ -84,6 +85,18 @@ class Room extends Component {
             activeViewers={room.activeViewers}
           />
           {userId && (<a href="/v1/logout">Logout</a>)}
+        </div>
+        <div className="Room__content">
+          {
+            (this.props.room.viewers.indexOf(roomId) > -1) ? (
+              <span>seats</span>
+            ) : (
+              <span>
+                <Username username={roomId} />
+                {' isn\'t here right now. Shoutout on twitter.'}
+              </span>
+            )
+          }
         </div>
         <Comments
           userId={userId}

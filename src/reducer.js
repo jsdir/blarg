@@ -16,11 +16,6 @@ import {
   TITLE_CHANGED,
 } from 'constants'
 
-const defaultRoom = {
-  loading: true,
-  error: null,
-}
-
 const addComment = (state, action) => update(state, {
   comments: { $push: [action.payload] },
 })
@@ -29,9 +24,16 @@ const changeTitle = (state, action) => update(state, {
   title: { $set: action.payload },
 })
 
+const defaultRoom = {
+  loading: true,
+  error: null,
+}
+
+const getDefaultRoom = () => defaultRoom
+
 const roomReducer = handleActions({
-  [JOIN]: () => defaultRoom,
-  [LEAVE]: () => defaultRoom,
+  [JOIN]: getDefaultRoom,
+  [LEAVE]: getDefaultRoom,
   [ADD_COMMENT]: addComment,
   [COMMENT_ADDED]: addComment,
   [ROOM_DATA]: (_, action) => action.payload,
