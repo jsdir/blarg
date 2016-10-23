@@ -34,6 +34,9 @@ module.exports = {
         ? 'wss://blarg-im.herokuapp.com/v1/ws'
         : 'ws://localhost:8000/v1/ws'
       ),
+      TEMASYS_APP_KEY: JSON.stringify(
+        'a4ce66c5-0018-4695-b695-f063e4301a45'
+      ),
     }),
   ]),
   module: {

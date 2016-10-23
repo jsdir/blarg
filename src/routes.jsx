@@ -8,6 +8,7 @@ import RoomLoader from 'handlers/RoomLoader'
 export default (
   <Route path="/" component={App}>
     <IndexRoute component={Home} />
+    <IndexRoute component={Home} />
     <Route path="/:roomId" component={RoomLoader} />
   </Route>
 )

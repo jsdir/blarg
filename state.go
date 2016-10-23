@@ -45,6 +45,7 @@ func (r *Room) ToJSON() map[string]interface{} {
 		"totalViewers":  totalViewers,
 		"activeViewers": activeViewers,
 		"comments":      r.comments,
+		"seats":         []string{},
 	}
 }
 

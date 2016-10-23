@@ -8,6 +8,7 @@ import {
   changeTitle,
 } from 'actions'
 import Username from 'components/Username'
+import Seats from 'components/Seats'
 
 class Room extends Component {
 
@@ -52,10 +53,10 @@ class Room extends Component {
     })
   }
 
-  renderTitle(myRoom) {
+  renderTitle(isHost) {
     const { room } = this.props
 
-    return myRoom ? (
+    return isHost ? (
       <form onSubmit={this.handleSubmit}>
         <input
           type="text"
@@ -71,13 +72,13 @@ class Room extends Component {
 
   render() {
     const { room, userId, roomId } = this.props
-    const myRoom = userId && userId === roomId
+    const isHost = userId ? (userId === roomId) : false
 
     return (
       <div className="Room">
         <div className="Room__header">
           <span className="Room__title">
-            {this.renderTitle(myRoom)}
+            {this.renderTitle(isHost)}
           </span>
           <Viewers
             viewers={room.viewers}
@@ -89,7 +90,12 @@ class Room extends Component {
         <div className="Room__content">
           {
             (this.props.room.viewers.indexOf(roomId) > -1) ? (
-              <span>seats</span>
+              <Seats
+                room={room}
+                isHost={isHost}
+                userId={userId}
+                roomId={roomId}
+              />
             ) : (
               <span>
                 <Username username={roomId} />
