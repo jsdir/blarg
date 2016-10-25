@@ -20,9 +20,34 @@ type Room struct {
 	subscribers  map[chan StateMessage]string
 	totalAnons   map[string]bool
 	totalMembers map[string]bool
+	callers      []string
+	seats        []string
 }
 
 var noRoomError = errors.New("room not found")
+
+func setAdd(values []string, value string) ([]string, bool) {
+	for _, v := range values {
+		if v == value {
+			return values, false
+		}
+	}
+
+	return append(values, value), true
+}
+
+func setRemove(values []string, value string) ([]string, bool) {
+	newValues := []string{}
+	ok := false
+	for _, v := range values {
+		if v == value {
+			ok = true
+		} else {
+			newValues = append(newValues, value)
+		}
+	}
+	return newValues, ok
+}
 
 func (r *Room) ToJSON() map[string]interface{} {
 	totalViewers, activeViewers := r.getViewerCounts()
@@ -45,7 +70,8 @@ func (r *Room) ToJSON() map[string]interface{} {
 		"totalViewers":  totalViewers,
 		"activeViewers": activeViewers,
 		"comments":      r.comments,
-		"seats":         []string{},
+		"callers":       r.callers,
+		"seats":         r.seats,
 	}
 }
 
@@ -71,6 +97,9 @@ type State interface {
 	Leave(roomId string, skip chan StateMessage, userId string)
 	AddComment(roomId string, skip chan StateMessage, comment Comment)
 	ChangeRoomTitle(roomId string, messages chan StateMessage, title string)
+	Call(roomId string, messages chan StateMessage, userId string)
+	CancelCall(roomId string, messages chan StateMessage, userId string)
+	AcceptCaller(roomId string, messages chan StateMessage, userId string)
 }
 
 type LocalState struct {
@@ -92,6 +121,8 @@ func (s *LocalState) Join(roomId string, userId string, address string) (*Room, 
 			subscribers:  map[chan StateMessage]string{},
 			totalAnons:   map[string]bool{},
 			totalMembers: map[string]bool{},
+			callers:      []string{},
+			seats:        []string{},
 		}
 	}
 
@@ -150,6 +181,8 @@ func (s *LocalState) Leave(roomId string, messages chan StateMessage, userId str
 		Type:    USER_LEFT,
 		Payload: room.getViewerPayload(userId),
 	})
+
+	// TODO: leave needs to remove any callers from the list
 }
 
 func (s *LocalState) AddComment(roomId string, skip chan StateMessage, comment Comment) {
@@ -183,6 +216,60 @@ func (s *LocalState) ChangeRoomTitle(roomId string, messages chan StateMessage, 
 		Type:    TITLE_CHANGED,
 		Payload: title,
 	})
+}
+
+func (s *LocalState) Call(roomId string, messages chan StateMessage, userId string) {
+	room, ok := s.rooms[roomId]
+	if !ok {
+		return
+	}
+
+	room.callers, ok = setAdd(room.callers, userId)
+	s.rooms[roomId] = room
+
+	// Only send if the user is not already calling.
+	if ok {
+		s.broadcast(roomId, messages, StateMessage{
+			Type:    CALL,
+			Payload: userId,
+		})
+	}
+}
+
+func (s *LocalState) CancelCall(roomId string, messages chan StateMessage, userId string) {
+	room, ok := s.rooms[roomId]
+	if !ok {
+		return
+	}
+
+	room.callers, ok = setRemove(room.callers, userId)
+	s.rooms[roomId] = room
+
+	// Only send if the user was already calling.
+	if ok {
+		s.broadcast(roomId, messages, StateMessage{
+			Type:    CANCEL_CALL,
+			Payload: userId,
+		})
+	}
+}
+
+func (s *LocalState) AcceptCaller(roomId string, messages chan StateMessage, userId string) {
+	room, ok := s.rooms[roomId]
+	if !ok {
+		return
+	}
+
+	room.callers, _ = setRemove(room.callers, userId)
+	room.seats, ok = setAdd(room.seats, userId)
+	s.rooms[roomId] = room
+
+	if ok {
+		s.broadcast(roomId, messages, StateMessage{
+			Type:    ACCEPT_CALLER,
+			Payload: userId,
+		})
+	}
 }
 
 func (s *LocalState) broadcast(roomId string, skip chan StateMessage, message StateMessage) {

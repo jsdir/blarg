@@ -8,6 +8,9 @@ import {
   LEAVE,
   ADD_COMMENT,
   CHANGE_TITLE,
+  CALL,
+  CANCEL_CALL,
+  ACCEPT_CALLER,
 } from 'constants'
 
 let connection
@@ -56,6 +59,9 @@ const connectionMiddleware = ({
     case JOIN:
     case LEAVE:
     case CHANGE_TITLE:
+    case CALL:
+    case CANCEL_CALL:
+    case ACCEPT_CALLER:
       send(JSON.stringify(action))
       break
     default:

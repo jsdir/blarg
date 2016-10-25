@@ -15,3 +15,9 @@ export const COMMENT_ADDED = 'COMMENT_ADDED'
 
 export const CHANGE_TITLE = 'CHANGE_TITLE'
 export const TITLE_CHANGED = 'TITLE_CHANGED'
+
+export const SHOW_CALLERS = 'SHOW_CALLERS'
+export const HIDE_CALLERS = 'HIDE_CALLERS'
+export const ACCEPT_CALLER = 'ACCEPT_CALLER'
+export const CALL = 'CALL'
+export const CANCEL_CALL = 'CANCEL_CALL'

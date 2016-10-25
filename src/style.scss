@@ -12,12 +12,17 @@ $base-color: $white;
 
 $large: 1.5em;
 $horizontal-spacing: 20px;
+$comments-width: 300px;
 
 // tags
 
 h1, h2, h3, h4, h5, p {
   padding: 0;
   margin: 0;
+}
+
+html, body, #root, .App, .Room, .Seats {
+  height: 100%;
 }
 
 body {
@@ -86,6 +91,7 @@ input {
 }
 
 .Room {
+  $header-height: 60px;
 
   &__title {
     font-size: $large;
@@ -97,16 +103,22 @@ input {
   }
 
   &__header {
-    $height: 60px;
-    line-height: $height;
+    line-height: $header-height;
     vertical-align: middle;
-    height: $height;
+    height: $header-height;
     border-bottom: 1px solid $grey;
     padding-left: $horizontal-spacing;
+    box-sizing: border-box;
 
     .User__icon {
       vertical-align: middle;
     }
+  }
+
+  &__content {
+    position: relative;
+    height: calc(100% - #{$header-height});
+    width: calc(100% - #{$comments-width});
   }
 }
 
@@ -129,7 +141,7 @@ input {
   right: 0;
   background-color: $dark-grey;
   border-left: 1px solid $grey;
-  width: 300px;
+  width: $comments-width;
 
   &__title {
     text-align: center;
@@ -157,4 +169,48 @@ input {
   &__icon {
     border-radius: 3px;
   }
+}
+
+.Seats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.Seat {
+  $border-radius: 4px;
+  border-radius: $border-radius;
+  position: relative;
+  height: 400px;
+  width: 400px;
+  margin: 10px;
+
+  &__user {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 10px;
+    background-color: rgba(0, 0, 0, 0.17);
+    padding: 10px;
+    border-radius: $border-radius;
+  }
+
+  video {
+    height: 100%;
+    width: 100%;
+    border-radius: $border-radius;
+  }
+}
+
+.CallersPanel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.EmptySeat {
+  border: 2px dashed $grey;
+  box-sizing: border-box;
 }

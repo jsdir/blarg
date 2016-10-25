@@ -23,15 +23,15 @@ class Seats extends React.Component {
     }).isRequired,
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.sl = new Skylink()
     this.sl.init(TEMASYS_APP_KEY)
 
     const { isHost } = this.props
     this.sl.joinRoom({
       useExactConstraints: true,
-      audio: isHost,
-      video: isHost && {
+      audio: true,
+      video: {
         resolution: {
           height: VIDEO_SIZE,
           width: VIDEO_SIZE,
@@ -42,68 +42,98 @@ class Seats extends React.Component {
       },
     })
 
-    if (isHost) {
-      this.sl.on('mediaAccessSuccess', this.handleMediaAccessSuccess)
-    } else {
-      this.sl.on('incomingStream', this.handleIncomingStream)
-    }
+    this.sl.muteStream({
+      audioMuted: !isHost,
+      videoMuted: !isHost,
+    })
+  }
+
+  componentDidMount() {
+    this.sl.on('mediaAccessSuccess', this.handleMediaAccessSuccess)
+    this.sl.on('incomingStream', this.handleIncomingStream)
   }
 
   componentWillUnmount() {
     this.sl.leaveRoom()
   }
 
-  seats = {}
+  setStream(userId, stream) {
+    this.streams[userId] = stream
 
-  handleMediaAccessSuccess = (stream) => {
-    if (this.props.isHost) {
-      this.seats[0].setMediaStream(stream)
+    const index = this.props.roomId === userId
+      ? 0
+      : this.props.room.seats.indexOf(userId) + 1
+
+    if (index > -1) {
+      this.seats[index].setMediaStream(stream)
+    }
+  }
+
+  setSeatNode = (userId, i) => (node) => {
+    if (!node) {
+      return
+    }
+
+    this.seats[i] = node
+
+    const stream = this.streams[userId]
+    if (stream) {
+      node.setMediaStream(stream)
+    } else if (userId === this.props.userId) {
+      this.sl.muteStream({
+        audioMuted: false,
+        videoMuted: false,
+      })
     }
   }
 
   handleIncomingStream = (peerId, stream, isSelf, peerInfo) => {
-    setTimeout(() => {
-      if (isSelf) {
-        return
-      }
-
-      const userId = peerInfo.userId
-      const index = this.props.roomId === userId
-        ? 0
-        : this.props.room.seats.indexOf(userId) + 1
-
-      if (index < 0) {
-        return
-      }
-
-      this.seats[index].setMediaStream(stream)
-    }, 1000)
+    console.log('handleIncomingStream')
+    if (!isSelf) {
+      this.setStream(peerInfo.userData.userId, stream)
+    }
   }
 
+  handleMediaAccessSuccess = (stream) => {
+    console.log('handleMediaAccessSuccess')
+    this.setStream(this.props.userId, stream)
+  }
+
+  seats = {}
+  streams = {}
+
+  renderSeat = (seat, i) => (
+    <Seat
+      {...seat}
+      key={seat.userId}
+      ref={this.setSeatNode(seat.userId, i)}
+    />
+  )
+
   render() {
-    const { roomId, room, isHost } = this.props
+    const { roomId, userId, room, isHost } = this.props
     const seats = [{
       isHost: true,
       userId: roomId,
-    }].concat(room.seats.map(userId => ({
-      userId,
+    }].concat(room.seats.map(seatUserId => ({
+      userId: seatUserId,
       isHost: false,
     })))
 
+    const showEmptySeat = (room.seats.length < MAX_GUESTS)
+      && userId
+      && (isHost || room.seats.indexOf(userId) === -1)
+
     return (
       <div className="Seats">
+        {seats.map(this.renderSeat)}
         {
-          seats.map((seat, i) => (
-            <Seat
-              {...seat}
-              key={seat.userId}
-              ref={(node) => { this.seats[i] = node }}
+          showEmptySeat && (
+            <EmptySeat
+              isHost={isHost}
+              userId={userId}
+              callers={room.callers}
             />
-          ))
-        }
-        {
-          (room.seats.length < MAX_GUESTS) && (
-            <EmptySeat isHost={isHost} />
           )
         }
       </div>

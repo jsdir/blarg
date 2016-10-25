@@ -8,11 +8,15 @@ import (
 )
 
 const (
-	JOIN         = "JOIN"
-	LEAVE        = "LEAVE"
-	ADD_COMMENT  = "ADD_COMMENT"
-	CHANGE_TITLE = "CHANGE_TITLE"
-	ROOM_DATA    = "ROOM_DATA"
+	JOIN          = "JOIN"
+	LEAVE         = "LEAVE"
+	ADD_COMMENT   = "ADD_COMMENT"
+	CHANGE_TITLE  = "CHANGE_TITLE"
+	ROOM_DATA     = "ROOM_DATA"
+	CALL          = "CALL"
+	CANCEL_CALL   = "CANCEL_CALL"
+	ACCEPT_CALLER = "ACCEPT_CALLER"
+	SEAT_JOINED   = "SEAT_JOINED"
 
 	// events
 	USER_JOINED   = "USER_JOINED"
@@ -128,6 +132,23 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 				title := message.Payload.(string)
 				s.State.ChangeRoomTitle(currentRoomId, roomMessages, title)
 			}
+
+		case CALL:
+			if currentRoomId != "" && userId != "" && currentRoomId != userId {
+				s.State.Call(currentRoomId, roomMessages, userId)
+			}
+
+		case CANCEL_CALL:
+			if currentRoomId != "" && userId != "" && currentRoomId != userId {
+				s.State.CancelCall(currentRoomId, roomMessages, userId)
+			}
+
+		case ACCEPT_CALLER:
+			if currentRoomId != "" && userId != "" && currentRoomId == userId {
+				userId := message.Payload.(string)
+				s.State.AcceptCaller(currentRoomId, roomMessages, userId)
+			}
+
 		}
 	}
 }

@@ -9,6 +9,7 @@ import {
 } from 'actions'
 import Username from 'components/Username'
 import Seats from 'components/Seats'
+import CallersPanel from 'components/CallersPanel'
 
 class Room extends Component {
 
@@ -103,6 +104,7 @@ class Room extends Component {
               </span>
             )
           }
+          {room.showCallers && (<CallersPanel />)}
         </div>
         <Comments
           userId={userId}
@@ -120,3 +122,21 @@ export default connect(
     changeTitle,
   }
 )(Room)
+
+/*
+   on ACCEPT_CALLER
+   seat gets added
+
+   when the seat gets mounted, start the stream
+
+   on every new stream
+     record it in local state with a hash of userId to item
+     if the ref exists, set the media stream
+
+   on close stream
+     remove from the hash
+
+   on new mounted seat ()
+     set the seat as a ref
+     if the stream already exists, mount the stream
+*/
