@@ -60,12 +60,13 @@ class Seats extends React.Component {
   setStream(userId, stream) {
     this.streams[userId] = stream
 
-    const index = this.props.roomId === userId
-      ? 0
-      : this.props.room.seats.indexOf(userId) + 1
-
-    if (index > -1) {
-      this.seats[index].setMediaStream(stream)
+    if (this.props.roomId === userId) {
+      this.seats[0].setMediaStream(stream)
+    } else {
+      const index = this.props.room.seats.indexOf(userId)
+      if (index > -1) {
+        this.seats[index + 1].setMediaStream(stream)
+      }
     }
   }
 
@@ -88,14 +89,12 @@ class Seats extends React.Component {
   }
 
   handleIncomingStream = (peerId, stream, isSelf, peerInfo) => {
-    console.log('handleIncomingStream')
     if (!isSelf) {
       this.setStream(peerInfo.userData.userId, stream)
     }
   }
 
   handleMediaAccessSuccess = (stream) => {
-    console.log('handleMediaAccessSuccess')
     this.setStream(this.props.userId, stream)
   }
 
