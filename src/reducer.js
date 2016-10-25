@@ -19,6 +19,7 @@ import {
   CALL,
   CANCEL_CALL,
   ACCEPT_CALLER,
+  USER_LEFT_SEAT,
 } from 'constants'
 
 const addComment = (state, action) => update(state, {
@@ -90,6 +91,9 @@ const roomReducer = handleActions({
   [ACCEPT_CALLER]: (state, action) => update(state, {
     callers: { $apply: removeFromArray(action.payload) },
     seats: { $push: [action.payload] },
+  }),
+  [USER_LEFT_SEAT]: (state, action) => update(state, {
+    seats: { $apply: removeFromArray(action.payload) },
   }),
 }, defaultRoom)
 

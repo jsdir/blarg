@@ -19,10 +19,11 @@ const (
 	SEAT_JOINED   = "SEAT_JOINED"
 
 	// events
-	USER_JOINED   = "USER_JOINED"
-	USER_LEFT     = "USER_LEFT"
-	COMMENT_ADDED = "COMMENT_ADDED"
-	TITLE_CHANGED = "TITLE_CHANGED"
+	USER_JOINED    = "USER_JOINED"
+	USER_LEFT      = "USER_LEFT"
+	COMMENT_ADDED  = "COMMENT_ADDED"
+	TITLE_CHANGED  = "TITLE_CHANGED"
+	USER_LEFT_SEAT = "USER_LEFT_SEAT"
 )
 
 var upgrader = websocket.Upgrader{
@@ -63,6 +64,8 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 
 	leave := func() {
 		if currentRoomId != "" {
+			s.State.CancelCall(currentRoomId, roomMessages, userId)
+			s.State.LeaveSeat(currentRoomId, roomMessages, userId)
 			s.State.Leave(currentRoomId, roomMessages, userId)
 		}
 	}

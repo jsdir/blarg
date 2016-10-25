@@ -100,6 +100,7 @@ type State interface {
 	Call(roomId string, messages chan StateMessage, userId string)
 	CancelCall(roomId string, messages chan StateMessage, userId string)
 	AcceptCaller(roomId string, messages chan StateMessage, userId string)
+	LeaveSeat(roomId string, messages chan StateMessage, userId string)
 }
 
 type LocalState struct {
@@ -181,8 +182,6 @@ func (s *LocalState) Leave(roomId string, messages chan StateMessage, userId str
 		Type:    USER_LEFT,
 		Payload: room.getViewerPayload(userId),
 	})
-
-	// TODO: leave needs to remove any callers from the list
 }
 
 func (s *LocalState) AddComment(roomId string, skip chan StateMessage, comment Comment) {
@@ -267,6 +266,23 @@ func (s *LocalState) AcceptCaller(roomId string, messages chan StateMessage, use
 	if ok {
 		s.broadcast(roomId, messages, StateMessage{
 			Type:    ACCEPT_CALLER,
+			Payload: userId,
+		})
+	}
+}
+
+func (s *LocalState) LeaveSeat(roomId string, messages chan StateMessage, userId string) {
+	room, ok := s.rooms[roomId]
+	if !ok {
+		return
+	}
+
+	room.seats, ok = setRemove(room.seats, userId)
+	s.rooms[roomId] = room
+
+	if ok {
+		s.broadcast(roomId, messages, StateMessage{
+			Type:    USER_LEFT_SEAT,
 			Payload: userId,
 		})
 	}
