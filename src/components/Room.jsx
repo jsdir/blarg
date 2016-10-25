@@ -122,21 +122,3 @@ export default connect(
     changeTitle,
   }
 )(Room)
-
-/*
-   on ACCEPT_CALLER
-   seat gets added
-
-   when the seat gets mounted, start the stream
-
-   on every new stream
-     record it in local state with a hash of userId to item
-     if the ref exists, set the media stream
-
-   on close stream
-     remove from the hash
-
-   on new mounted seat ()
-     set the seat as a ref
-     if the stream already exists, mount the stream
-*/

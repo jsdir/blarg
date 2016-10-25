@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node_modules/.bin/webpack -w",
-    "build": "BLARG_ENV=production node_modules/.bin/webpack && cp -r static/* dist",
+    "build": "BLARG_ENV=production node_modules/.bin/webpack",
     "deploy": "aws s3 cp ./dist s3://blarg.im --recursive",
     "postinstall": "npm run build"
   },
