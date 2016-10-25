@@ -71,11 +71,11 @@ class Seats extends React.Component {
   }
 
   setSeatNode = (userId, i) => (node) => {
-    if (!node) {
+    this.seats[i] = node
+
+    if (!node || this.seatUsers[userId]) {
       return
     }
-
-    this.seats[i] = node
 
     const stream = this.streams[userId]
     if (stream) {
@@ -86,7 +86,11 @@ class Seats extends React.Component {
         videoMuted: false,
       })
     }
+
+    this.seatUsers[userId] = true
   }
+
+  seatUsers = {}
 
   handleIncomingStream = (peerId, stream, isSelf, peerInfo) => {
     if (!isSelf) {
