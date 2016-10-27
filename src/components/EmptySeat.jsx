@@ -57,13 +57,17 @@ class EmptySeat extends Component {
   }
 
   renderCallers() {
-    return (
+    return this.props.callers.length ? (
       <div>
         {this.props.callers.map(renderCaller)}
         <Button onClick={this.props.showCallers}>
           Show Callers
         </Button>
       </div>
+    ) : (
+      <span className="EmptySeat__waiting">
+        Waiting for callers...
+      </span>
     )
   }
 

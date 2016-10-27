@@ -9,6 +9,7 @@ $grey: #444;
 $dull-grey: #333;
 $dark-grey: #222;
 $base-color: $white;
+$black: #000;
 
 // constants
 
@@ -16,6 +17,8 @@ $large: 1.5em;
 $horizontal-spacing: 20px;
 $comments-width: 300px;
 $header-height: 60px;
+
+$size-l: 1.4em;
 
 // mixins
 
@@ -261,6 +264,10 @@ input {
     width: 100%;
     border-radius: $border-radius;
   }
+
+  &--opaque {
+    box-shadow: 0 0 6px rgba($black, 0.58);
+  }
 }
 
 .CallersPanel {
@@ -274,6 +281,13 @@ input {
 .EmptySeat {
   border: 2px dashed $grey;
   box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &__waiting {
+    font-size: $size-l;
+  }
 }
 
 .Comment {

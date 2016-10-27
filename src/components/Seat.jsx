@@ -23,7 +23,10 @@ class Seat extends React.Component {
   render() {
     const { size } = this.props
     return (
-      <div className="Seat" style={{ height: size, width: size }}>
+      <div
+        className="Seat Seat--opaque"
+        style={{ height: size, width: size }}
+      >
         <video
           autoPlay
           ref={this.setVideoNode}
