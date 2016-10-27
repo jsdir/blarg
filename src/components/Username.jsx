@@ -1,24 +1,17 @@
 import React, { PropTypes } from 'react'
-import { Link } from 'react-router'
 
-const Username = (props) => {
-  const Component = props.noLink
-    ? 'span'
-    : Link
+import UserPreviewButton from 'components/UserPreviewButton'
 
-  return (
-    <Component
-      className="Username"
-      to={props.username}
-    >
+const Username = (props) => (
+  <UserPreviewButton userId={props.username}>
+    <a className="Username">
       @{props.username}{props.possessive && "'s"}
-    </Component>
-  )
-}
+    </a>
+  </UserPreviewButton>
+)
 
 Username.propTypes = {
-  username: PropTypes.string,
-  noLink: PropTypes.bool,
+  username: PropTypes.string.isRequired,
   possessive: PropTypes.bool,
 }
 

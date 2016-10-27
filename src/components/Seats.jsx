@@ -1,3 +1,4 @@
+/* eslint-env browser */
 /* global TEMASYS_APP_KEY, attachMediaStream */
 /* global Skylink */
 
@@ -8,6 +9,9 @@ import EmptySeat from 'components/EmptySeat'
 
 const VIDEO_SIZE = 300
 const MAX_GUESTS = 3
+const SEAT_MARGIN = 12
+const CONTAINER_SIZE_DIFF = 60
+const SEAT_SIZE_DIFF = SEAT_MARGIN * 2
 
 // http://cdn.temasys.com.sg/skylink/skylinkjs/latest/doc/classes/Skylink.html
 class Seats extends React.Component {
@@ -21,6 +25,11 @@ class Seats extends React.Component {
         PropTypes.string.isRequired,
       ).isRequired,
     }).isRequired,
+  }
+
+  state = {
+    containerSize: 0,
+    size: false,
   }
 
   componentWillMount() {
@@ -51,10 +60,17 @@ class Seats extends React.Component {
   componentDidMount() {
     this.sl.on('mediaAccessSuccess', this.handleMediaAccessSuccess)
     this.sl.on('incomingStream', this.handleIncomingStream)
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize()
   }
 
   componentWillUnmount() {
     this.sl.leaveRoom()
+    window.removeEventListener('resize', this.handleResize)
+  }
+
+  setNode = (node) => {
+    this.node = node
   }
 
   setStream(userId, stream) {
@@ -99,7 +115,20 @@ class Seats extends React.Component {
   }
 
   handleMediaAccessSuccess = (stream) => {
-    this.setStream(this.props.userId, stream)
+    setTimeout(() => {
+      this.setStream(this.props.userId, stream)
+    }, 1000)
+  }
+
+  handleResize = () => {
+    if (!this.node) {
+      return
+    }
+
+    const rect = this.node.getBoundingClientRect()
+    const containerSize = Math.min(rect.height, rect.width) - CONTAINER_SIZE_DIFF
+    const size = Math.floor(containerSize / 2) - SEAT_SIZE_DIFF
+    this.setState({ size, containerSize })
   }
 
   seats = {}
@@ -108,12 +137,15 @@ class Seats extends React.Component {
   renderSeat = (seat, i) => (
     <Seat
       {...seat}
+      size={this.state.size}
       key={seat.userId}
       ref={this.setSeatNode(seat.userId, i)}
     />
   )
 
   render() {
+    const { size, containerSize } = this.state
+
     const { roomId, userId, room, isHost } = this.props
     const seats = [{
       isHost: true,
@@ -128,17 +160,23 @@ class Seats extends React.Component {
       && (isHost || room.seats.indexOf(userId) === -1)
 
     return (
-      <div className="Seats">
-        {seats.map(this.renderSeat)}
-        {
-          showEmptySeat && (
-            <EmptySeat
-              isHost={isHost}
-              userId={userId}
-              callers={room.callers}
-            />
-          )
-        }
+      <div className="Seats" ref={this.setNode}>
+        <div
+          className="Seats__container"
+          style={{ height: containerSize, width: containerSize }}
+        >
+          {size && seats.map(this.renderSeat)}
+          {
+            size && showEmptySeat && (
+              <EmptySeat
+                size={size}
+                isHost={isHost}
+                userId={userId}
+                callers={room.callers}
+              />
+            )
+          }
+        </div>
       </div>
     )
   }

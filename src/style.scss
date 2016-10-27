@@ -4,7 +4,9 @@
 
 $white: #fafafa;
 $light-grey: #777;
+$lighter-grey: #555;
 $grey: #444;
+$dull-grey: #333;
 $dark-grey: #222;
 $base-color: $white;
 
@@ -13,6 +15,30 @@ $base-color: $white;
 $large: 1.5em;
 $horizontal-spacing: 20px;
 $comments-width: 300px;
+$header-height: 60px;
+
+// mixins
+
+@mixin scrollbars($size, $foreground-color, $background-color: darker($foreground-color, 20%)) {
+  ::-webkit-scrollbar {
+      width:  $size;
+      height: $size;
+  }
+
+  ::-webkit-scrollbar-thumb {
+      background: $foreground-color;
+  }
+
+  ::-webkit-scrollbar-track {
+      background: $background-color;
+  }
+
+  // For Internet Explorer
+  body {
+    scrollbar-face-color: $foreground-color;
+    scrollbar-track-color: $background-color;
+  }
+}
 
 // tags
 
@@ -38,6 +64,11 @@ a {
   color: $base-color;
   text-decoration: none;
   font-weight: 600;
+  cursor: pointer;
+}
+
+img {
+  vertical-align: middle;
 }
 
 input {
@@ -56,11 +87,13 @@ input {
   }
 }
 
+@include scrollbars(.5em, $light-grey);
+
 // components
 
 .Home {
   text-align: center;
-  margin-top: 100px;
+  padding-top: 100px;
 
   h1 {
     font-size: 100px;
@@ -91,8 +124,6 @@ input {
 }
 
 .Room {
-  $header-height: 60px;
-
   &__title {
     font-size: $large;
     margin-right: $horizontal-spacing;
@@ -142,18 +173,29 @@ input {
   background-color: $dark-grey;
   border-left: 1px solid $grey;
   width: $comments-width;
+  display: flex;
+  flex-direction: column;
 
   &__title {
     text-align: center;
     font-size: 1.5em;
     font-weight: 600;
+    height: $header-height;
+    line-height: $header-height;
+    margin: 0 15px;
+    border-bottom: 1px solid $grey;
+    box-sizing: border-box;
+  }
+
+  &__list {
+    flex-grow: 1;
+    padding: 0 15px;
+    padding-top: 15px;
+    overflow-y: scroll;
+    overflow-x: hidden;
   }
 
   &__input {
-    bottom: 0;
-    right: 0;
-    left: 0;
-    position: absolute;
 
     input {
       width: 100%;
@@ -161,6 +203,10 @@ input {
       background-color: $grey;
       color: $white;
     }
+  }
+
+  .Comment, .EventNotice {
+    margin-bottom: 15px;
   }
 }
 
@@ -175,24 +221,39 @@ input {
   display: flex;
   justify-content: center;
   align-items: center;
+
+  &__container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
 }
 
 .Seat {
   $border-radius: 4px;
   border-radius: $border-radius;
   position: relative;
-  height: 400px;
-  width: 400px;
-  margin: 10px;
+  margin: 12px;
+  vertical-align: middle;
 
   &__user {
     position: absolute;
     top: 0;
     left: 0;
     margin: 10px;
-    background-color: rgba(0, 0, 0, 0.17);
+    background-color: rgba(0, 0, 0, 0.5);
     padding: 10px;
     border-radius: $border-radius;
+
+    .User {
+      margin-right: 10px;
+    }
+
+    .User__icon {
+      height: 32px;
+      width: 32px;
+    }
   }
 
   video {
@@ -213,4 +274,25 @@ input {
 .EmptySeat {
   border: 2px dashed $grey;
   box-sizing: border-box;
+}
+
+.Comment {
+  display: flex;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+  }
+
+  .Username {
+    margin-bottom: 3px;
+  }
+}
+
+.EventNotice {
+  background-color: $dull-grey;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  padding: 10px;
 }

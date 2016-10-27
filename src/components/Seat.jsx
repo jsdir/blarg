@@ -9,6 +9,7 @@ class Seat extends React.Component {
   static propTypes = {
     userId: PropTypes.string.isRequired,
     isHost: PropTypes.bool.isRequired,
+    size: PropTypes.number.isRequired,
   }
 
   setVideoNode = (videoNode) => {
@@ -20,20 +21,21 @@ class Seat extends React.Component {
   }
 
   render() {
+    const { size } = this.props
     return (
-      <div className="Seat">
-        <div className="Seat__user">
-          <User
-            showUsername
-            username={this.props.userId}
-          />
-        </div>
+      <div className="Seat" style={{ height: size, width: size }}>
         <video
           autoPlay
           ref={this.setVideoNode}
           height={480}
           width={480}
         />
+        <div className="Seat__user">
+          <User
+            showUsername
+            username={this.props.userId}
+          />
+        </div>
       </div>
     )
   }

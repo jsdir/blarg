@@ -28,6 +28,7 @@ class EmptySeat extends Component {
     showCallers: PropTypes.func.isRequired,
     call: PropTypes.func.isRequired,
     cancelCall: PropTypes.func.isRequired,
+    size: PropTypes.number.isRequired,
   }
 
   call = () => {
@@ -67,8 +68,9 @@ class EmptySeat extends Component {
   }
 
   render() {
+    const { size } = this.props
     return (
-      <div className="EmptySeat Seat">
+      <div className="EmptySeat Seat" style={{ height: size, width: size }}>
         {this.props.isHost ? this.renderCallers() : this.renderJoin()}
       </div>
     )

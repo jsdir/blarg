@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 
-import User from 'components/User'
-import Username from 'components/Username'
+import Comment from 'components/Comment'
+import EventNotice from 'components/EventNotice'
 
 class Comments extends Component {
 
@@ -28,19 +28,15 @@ class Comments extends Component {
     this.setState({ commentText: '' })
   }
 
-  renderComment = (comment, index) => (comment.event ? (
-    <div key={index}>
-      <Username username={comment.senderId} />
-      {comment.joined ? 'joined' : 'left'}
-    </div>
-  ) : (
-    <div key={index}>
-      <User username={comment.senderId} />
-      <Username username={comment.senderId} />
-      {' '}
-      {comment.text}
-    </div>
-  ))
+  renderComment = (comment, index) => {
+    const CommentComponent = comment.event
+      ? EventNotice
+      : Comment
+
+    return (
+      <CommentComponent key={index} comment={comment} />
+    )
+  }
 
   renderInput() {
     return (
@@ -58,7 +54,7 @@ class Comments extends Component {
     return (
       <div className="Comments">
         <div className="Comments__title">
-          Comments
+          Chat
         </div>
         <div className="Comments__list">
           {this.props.comments.map(this.renderComment)}
