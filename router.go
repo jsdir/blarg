@@ -19,6 +19,10 @@ func NewRouter(s *Server) *goji.Mux {
 	mux.Use(c.Handler)
 	mux.UseC(s.NotFound)
 
+	if s.ForceHTTPS {
+		mux.Use(ForceHTTPS)
+	}
+
 	// Handlers
 	mux.HandleFunc(pat.Get("/v1/authenticate"), s.HandleAuthenticate)
 	mux.HandleFunc(pat.Get("/v1/callback"), s.HandleCallback)

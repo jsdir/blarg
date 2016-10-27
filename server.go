@@ -30,6 +30,7 @@ type Server struct {
 	OAuthClient   oauth.Client
 	State         State
 	ClientBaseUrl string
+	ForceHTTPS    bool
 }
 
 func newPool(addr, password string) *redis.Pool {
@@ -99,8 +100,10 @@ func NewServer() Server {
 
 	// Config
 	clientBaseUrl := "http://localhost:8000"
+	forceHTTPS := false
 	if environment == Production {
 		clientBaseUrl = "https://blarg-im.herokuapp.com"
+		forceHTTPS = true
 	}
 
 	return Server{
@@ -109,5 +112,6 @@ func NewServer() Server {
 		OAuthClient:   oauthClient,
 		State:         &state,
 		ClientBaseUrl: clientBaseUrl,
+		ForceHTTPS:    forceHTTPS,
 	}
 }

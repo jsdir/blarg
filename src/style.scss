@@ -22,7 +22,11 @@ $size-l: 1.4em;
 
 // mixins
 
-@mixin scrollbars($size, $foreground-color, $background-color: darker($foreground-color, 20%)) {
+@mixin scrollbars(
+  $size,
+  $foreground-color,
+  $background-color: darker($foreground-color, 20%)
+) {
   ::-webkit-scrollbar {
       width:  $size;
       height: $size;
