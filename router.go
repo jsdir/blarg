@@ -11,17 +11,18 @@ import (
 func NewRouter(s *Server) *goji.Mux {
 	mux := goji.NewMux()
 
+	if s.ForceHTTPS {
+		mux.Use(ForceHTTPS)
+	}
+
 	// CORS
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
 	})
+
 	mux.Use(c.Handler)
 	mux.UseC(s.NotFound)
-
-	if s.ForceHTTPS {
-		mux.Use(ForceHTTPS)
-	}
 
 	// Handlers
 	mux.HandleFunc(pat.Get("/v1/authenticate"), s.HandleAuthenticate)
