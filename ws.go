@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -57,6 +58,33 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 	if session.Values[tokenCredKey] != nil {
 		userId = session.Values[usernameKey].(string)
 	}
+
+	// Tick
+	timeout := time.Duration(60) * time.Second
+	tickDuration := timeout / 2
+	tick := time.Tick(tickDuration)
+	tickCloseCh := make(chan bool)
+	go func() {
+		for {
+			select {
+			case <-tick:
+				deadline := time.Now().Add(tickDuration)
+				err := conn.WriteControl(
+					websocket.PingMessage, nil, deadline,
+				)
+				if err != nil {
+					// handleInternalServerError(err, w)
+					return
+				}
+			case <-tickCloseCh:
+				return
+			}
+		}
+	}()
+
+	defer func() {
+		tickCloseCh <- true
+	}()
 
 	// Only one room available per connection.
 	currentRoomId := ""
