@@ -1,25 +1,34 @@
-import React, { PropTypes } from 'react'
+import React, { Component, PropTypes } from 'react'
 
 import User from 'components/User'
 import Username from 'components/Username'
 
-const Comment = props => (
-  <div className="Comment">
-    <User username={props.comment.senderId} />
-    <div className="Comment__content">
-      <Username username={props.comment.senderId} />
-      <span className="Comment__text">
-        {props.comment.text}
-      </span>
-    </div>
-  </div>
-)
+class Comment extends Component {
 
-Comment.propTypes = {
-  comment: React.PropTypes.shape({
-    text: PropTypes.string.isRequired,
-    senderId: PropTypes.string.isRequired,
-  }).isRequired,
+  static propTypes = {
+    comment: PropTypes.shape({
+      text: PropTypes.string.isRequired,
+      senderId: PropTypes.string.isRequired,
+    }).isRequired,
+  }
+
+  shouldComponentUpdate() {
+    return false
+  }
+
+  render() {
+    return (
+      <div className="Comment">
+        <User username={this.props.comment.senderId} />
+        <div className="Comment__content">
+          <Username username={this.props.comment.senderId} />
+          <span className="Comment__text">
+            {this.props.comment.text}
+          </span>
+        </div>
+      </div>
+    )
+  }
 }
 
 export default Comment

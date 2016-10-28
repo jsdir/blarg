@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react'
 
 import Comment from 'components/Comment'
 import EventNotice from 'components/EventNotice'
+import CommentInput from 'components/CommentInput'
 
 class Comments extends Component {
 
@@ -15,17 +16,64 @@ class Comments extends Component {
   }
 
   state = {
-    commentText: '',
+    unreadMessages: 0,
   }
 
-  handleChangeCommentText = (event) => {
-    this.setState({ commentText: event.target.value })
+  componentDidMount() {
+    // Show the latest comments by default.
+    this.scrollToBottom()
+    this.node.addEventListener('scroll', this.handleScroll)
   }
 
-  handleSubmit = (event) => {
-    event.preventDefault()
-    this.props.onAddComment(this.state.commentText)
-    this.setState({ commentText: '' })
+  componentWillUpdate(nextProps) {
+    const newCommentCount = nextProps.comments.length
+    const oldCommentCount = this.props.comments.length
+    if (newCommentCount > oldCommentCount) {
+      this.shouldScroll = this.isScrolledToBottom()
+      this.setState({
+        unreadMessages: this.state.unreadMessages + (
+          newCommentCount - oldCommentCount
+        ),
+      })
+    }
+  }
+
+  componentDidUpdate() {
+    if (this.shouldScroll) {
+      this.scrollToBottom()
+    }
+    this.shouldScroll = false
+  }
+
+  componentWillUnmount() {
+    this.node.removeEventListener('scroll', this.handleScroll)
+  }
+
+  setNode = (node) => {
+    this.node = node
+  }
+
+  isScrolledToBottom = () => this.node.scrollTop === (
+    this.node.scrollHeight - this.node.offsetHeight
+  )
+
+  scrollToBottom = () => {
+    this.node.scrollTop = this.node.scrollHeight
+  }
+
+  showUnreadMessages = () => {
+    this.scrollToBottom()
+    this.setState({ unreadMessages: 0 })
+  }
+
+  handleAddComment = (commentText) => {
+    this.props.onAddComment(commentText)
+  }
+
+  handleScroll = () => {
+    if (this.isScrolledToBottom() && this.state.unreadMessages > 0) {
+      this.setState({ unreadMessages: 0 })
+    }
   }
 
   renderComment = (comment, index) => {
@@ -38,28 +86,27 @@ class Comments extends Component {
     )
   }
 
-  renderInput() {
-    return (
-      <form className="Comments__input" onSubmit={this.handleSubmit}>
-        <input
-          placeholder="Leave a comment..."
-          onChange={this.handleChangeCommentText}
-          value={this.state.commentText}
-        />
-      </form>
-    )
-  }
-
   render() {
     return (
       <div className="Comments">
         <div className="Comments__title">
           Chat
         </div>
-        <div className="Comments__list">
+        <div className="Comments__list" ref={this.setNode}>
           {this.props.comments.map(this.renderComment)}
         </div>
-        {this.props.userId && this.renderInput()}
+        {this.state.unreadMessages > 0 && (
+          <a
+            className="Comments__unread"
+            onClick={this.showUnreadMessages}
+            tabIndex={0}
+          >
+            Show {this.state.unreadMessages} unread messages
+          </a>
+        )}
+        {this.props.userId && (
+          <CommentInput onAddComment={this.handleAddComment} />
+        )}
       </div>
     )
   }

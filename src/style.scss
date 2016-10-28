@@ -15,7 +15,7 @@ $black: #000;
 
 $large: 1.5em;
 $horizontal-spacing: 20px;
-$comments-width: 300px;
+$comments-width: 350px;
 $header-height: 60px;
 
 $size-l: 1.4em;
@@ -215,11 +215,23 @@ input {
   .Comment, .EventNotice {
     margin-bottom: 15px;
   }
+
+  &__unread {
+    background-color: purple;
+    padding: 20px;
+    position: absolute;
+    bottom: 60px;
+    left: 0;
+    right: 0;
+  }
 }
 
 .User{
 
   &__icon {
+    $size: 48px;
+    height: $size;
+    width: $size;
     border-radius: 3px;
   }
 }
