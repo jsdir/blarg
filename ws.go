@@ -60,6 +60,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 
 	// Only one room available per connection.
 	currentRoomId := ""
+	isHost := false
 	var roomMessages chan StateMessage
 
 	leave := func() {
@@ -67,6 +68,9 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			s.State.CancelCall(currentRoomId, roomMessages, userId)
 			s.State.LeaveSeat(currentRoomId, roomMessages, userId)
 			s.State.Leave(currentRoomId, roomMessages, userId)
+			if isHost {
+				// TODO: kick everyone
+			}
 		}
 	}
 	defer leave()
@@ -85,6 +89,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 		case JOIN:
 			leave()
 			currentRoomId = message.Payload.(string)
+			isHost = userId != "" && userId == currentRoomId
 			room, messages := s.State.Join(currentRoomId, userId, r.RemoteAddr)
 			roomMessages = messages
 
@@ -131,7 +136,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			// 1. A room is already loaded.
 			// 2. The user is authenticated.
 			// 3. The user is the host.
-			if currentRoomId != "" && userId != "" && currentRoomId == userId {
+			if isHost {
 				title := message.Payload.(string)
 				s.State.ChangeRoomTitle(currentRoomId, roomMessages, title)
 			}
@@ -147,7 +152,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			}
 
 		case ACCEPT_CALLER:
-			if currentRoomId != "" && userId != "" && currentRoomId == userId {
+			if isHost {
 				userId := message.Payload.(string)
 				s.State.AcceptCaller(currentRoomId, roomMessages, userId)
 			}
