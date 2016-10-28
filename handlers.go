@@ -13,10 +13,11 @@ import (
 
 // Session keys.
 const (
-	tempCredKey   = "tempCred"
-	tokenCredKey  = "tokenCred"
-	sessionPrefix = "session"
-	usernameKey   = "username"
+	tempCredKey      = "tempCred"
+	tokenCredKey     = "tokenCred"
+	sessionPrefix    = "session"
+	usernameKey      = "username"
+	initialRoomIdKey = "roomId"
 )
 
 func handleInternalServerError(err error, w http.ResponseWriter) {
@@ -83,6 +84,7 @@ func (s *Server) HandleAuthenticate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	session.Values[tempCredKey] = tempCred
+	session.Values[initialRoomIdKey] = r.URL.Query().Get("roomId")
 	if err = session.Save(r, w); err != nil {
 		handleInternalServerError(err, w)
 		return
@@ -130,7 +132,12 @@ func (s *Server) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, s.ClientBaseUrl+"/"+username, 302)
+	roomId := session.Values[initialRoomIdKey].(string)
+	if roomId == "" {
+		roomId = username
+	}
+
+	http.Redirect(w, r, s.ClientBaseUrl+"/"+roomId, 302)
 }
 
 func (s *Server) HandleLogout(w http.ResponseWriter, r *http.Request) {

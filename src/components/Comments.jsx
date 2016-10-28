@@ -3,11 +3,13 @@ import React, { Component, PropTypes } from 'react'
 import Comment from 'components/Comment'
 import EventNotice from 'components/EventNotice'
 import CommentInput from 'components/CommentInput'
+import TwitterLogin from 'components/TwitterLogin'
 
 class Comments extends Component {
 
   static propTypes = {
     userId: PropTypes.string,
+    roomId: PropTypes.string.isRequired,
     comments: PropTypes.arrayOf(PropTypes.shape({
       text: PropTypes.string,
       user: PropTypes.string,
@@ -104,9 +106,15 @@ class Comments extends Component {
             Show {this.state.unreadMessages} unread messages
           </a>
         )}
-        {this.props.userId && (
-          <CommentInput onAddComment={this.handleAddComment} />
-        )}
+        {
+          this.props.userId ? (
+            <CommentInput onAddComment={this.handleAddComment} />
+          ) : (
+            <TwitterLogin
+              roomId={this.props.roomId}
+            >Login to Chat</TwitterLogin>
+          )
+        }
       </div>
     )
   }

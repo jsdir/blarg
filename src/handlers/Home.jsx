@@ -3,8 +3,7 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 
-import Button from 'components/Button'
-import Icon from 'components/Icon'
+import TwitterLogin from 'components/TwitterLogin'
 
 class Home extends Component {
 
@@ -30,10 +29,7 @@ class Home extends Component {
       <div className="Home">
         <h1>Blarg</h1>
         <p>Ramble with friends.</p>
-        <Button
-          component="a"
-          href={`${API_BASE_URL}/authenticate`}
-        ><Icon type="twitter" />Login with Twitter</Button>
+        <TwitterLogin />
       </div>
     )
   }

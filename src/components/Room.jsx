@@ -108,6 +108,7 @@ class Room extends Component {
         </div>
         <Comments
           userId={userId}
+          roomId={roomId}
           comments={room.comments}
           onAddComment={this.addComment}
         />
