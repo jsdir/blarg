@@ -104,6 +104,7 @@ type State interface {
 	CancelCall(roomId string, messages chan StateMessage, userId string)
 	AcceptCaller(roomId string, messages chan StateMessage, userId string)
 	LeaveSeat(roomId string, messages chan StateMessage, userId string)
+	Reset(roomId string, messages chan StateMessage)
 }
 
 type LocalState struct {
@@ -282,9 +283,8 @@ func (s *LocalState) LeaveSeat(roomId string, messages chan StateMessage, userId
 	}
 
 	room.seats, ok = setRemove(room.seats, userId)
-	s.rooms[roomId] = room
-
 	if ok {
+		s.rooms[roomId] = room
 		s.broadcast(roomId, messages, StateMessage{
 			Type:    USER_LEFT_SEAT,
 			Payload: userId,
@@ -300,6 +300,24 @@ func (s *LocalState) SetRoomSessionId(roomId string, sessionId string) {
 
 	room.sessionId = sessionId
 	s.rooms[roomId] = room
+}
+
+func (s *LocalState) Reset(roomId string, messages chan StateMessage) {
+	room, ok := s.rooms[roomId]
+	if !ok {
+		return
+	}
+
+	room.callers = []string{}
+	room.seats = []string{}
+
+	s.rooms[roomId] = room
+
+	// TODO: we will test this without its dedicated action
+	// s.broadcast(roomId, messages, StateMessage{
+	// 	Type:    USER_LEFT_SEAT,
+	// 	Payload: userId,
+	// })
 }
 
 func (s *LocalState) broadcast(roomId string, skip chan StateMessage, message StateMessage) {

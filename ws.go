@@ -19,6 +19,7 @@ const (
 	CANCEL_CALL   = "CANCEL_CALL"
 	ACCEPT_CALLER = "ACCEPT_CALLER"
 	SEAT_JOINED   = "SEAT_JOINED"
+	KICK          = "KICK"
 
 	// events
 	USER_JOINED    = "USER_JOINED"
@@ -106,7 +107,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			s.State.LeaveSeat(currentRoomId, roomMessages, userId)
 			s.State.Leave(currentRoomId, roomMessages, userId)
 			if isHost {
-				// TODO: kick everyone
+				s.State.Reset(currentRoomId, roomMessages)
 			}
 		}
 	}
@@ -230,17 +231,12 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			if isHost {
 				userId := message.Payload.(string)
 				s.State.AcceptCaller(currentRoomId, roomMessages, userId)
-
-				// session := newSessionFromId
-				// token, err := newToken(session, tokbox.Publisher, userId)
-				// if err != nil {
-				// 	log.Println("token generation error:", err)
-				// 	return
-				// }
-
-				// s.State.SendNewToken(currentRoomId, userId, "")
 			}
-
+		case KICK:
+			if isHost {
+				userId := message.Payload.(string)
+				s.State.LeaveSeat(currentRoomId, roomMessages, userId)
+			}
 		}
 	}
 }
