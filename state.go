@@ -22,6 +22,7 @@ type Room struct {
 	totalMembers map[string]bool
 	callers      []string
 	seats        []string
+	sessionId    string
 }
 
 var noRoomError = errors.New("room not found")
@@ -72,6 +73,7 @@ func (r *Room) ToJSON() map[string]interface{} {
 		"comments":      r.comments,
 		"callers":       r.callers,
 		"seats":         r.seats,
+		"sessionId":     r.sessionId,
 	}
 }
 
@@ -91,6 +93,7 @@ func (r *Room) getViewerPayload(userId string) map[string]interface{} {
 }
 
 type State interface {
+	SetRoomSessionId(roomId string, sessionId string)
 	// userId is "" if the user is unauthenticated
 	Join(roomId string, userId string, address string) (*Room, chan StateMessage)
 	// userId is "" if the user is unauthenticated
@@ -124,6 +127,7 @@ func (s *LocalState) Join(roomId string, userId string, address string) (*Room, 
 			totalMembers: map[string]bool{},
 			callers:      []string{},
 			seats:        []string{},
+			sessionId:    "",
 		}
 	}
 
@@ -286,6 +290,16 @@ func (s *LocalState) LeaveSeat(roomId string, messages chan StateMessage, userId
 			Payload: userId,
 		})
 	}
+}
+
+func (s *LocalState) SetRoomSessionId(roomId string, sessionId string) {
+	room, ok := s.rooms[roomId]
+	if !ok {
+		return
+	}
+
+	room.sessionId = sessionId
+	s.rooms[roomId] = room
 }
 
 func (s *LocalState) broadcast(roomId string, skip chan StateMessage, message StateMessage) {

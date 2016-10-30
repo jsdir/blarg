@@ -6,7 +6,9 @@ import Button from 'components/Button'
 import Icon from 'components/Icon'
 
 const TwitterLogin = (props) => {
-  const params = props.roomId ? `?roomId=${props.roomId}` : ''
+  const params = props.roomId
+    ? `?roomId=${props.roomId}`
+    : ''
   return (
     <Button
       component="a"

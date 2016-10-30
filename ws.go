@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/pjebs/tokbox"
 )
 
 const (
@@ -40,6 +41,10 @@ func getMessage(
 	}
 }
 
+func newToken(session *tokbox.Session, role tokbox.Role, userId string) (string, error) {
+	return session.Token(role, "userId="+userId, tokbox.Days30)
+}
+
 func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -54,12 +59,13 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Store the authenticated user as userId
 	userId := ""
 	if session.Values[tokenCredKey] != nil {
 		userId = session.Values[usernameKey].(string)
 	}
 
-	// Tick
+	// Keep the connection alive
 	timeout := time.Duration(60) * time.Second
 	tickDuration := timeout / 2
 	tick := time.Tick(tickDuration)
@@ -70,10 +76,12 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			case <-tick:
 				deadline := time.Now().Add(tickDuration)
 				err := conn.WriteControl(
-					websocket.PingMessage, nil, deadline,
+					websocket.PingMessage,
+					nil,
+					deadline,
 				)
 				if err != nil {
-					// handleInternalServerError(err, w)
+					log.Println("tick error:", err)
 					return
 				}
 			case <-tickCloseCh:
@@ -86,7 +94,8 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 		tickCloseCh <- true
 	}()
 
-	// Only one room available per connection.
+	// Setup state
+	// Only one room available per connection
 	currentRoomId := ""
 	isHost := false
 	var roomMessages chan StateMessage
@@ -121,9 +130,48 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			room, messages := s.State.Join(currentRoomId, userId, r.RemoteAddr)
 			roomMessages = messages
 
+			// Create the room's TokBox session if it does not exist.
+			var session *tokbox.Session
+			if room.sessionId == "" {
+				// Add a new session id to the room.
+				session, err = s.TokBox.NewSession("", tokbox.MediaRouter)
+				if err != nil {
+					log.Println("tokbox new session error:", err)
+					return
+				}
+
+				s.State.SetRoomSessionId(currentRoomId, session.SessionId)
+				// Set this before the JSON serialization.
+				room.sessionId = session.SessionId
+			} else {
+				session = &tokbox.Session{
+					SessionId: room.sessionId,
+					T:         s.TokBox,
+				}
+			}
+
+			role := tokbox.Role(tokbox.Publisher)
+			// TODO: send specific tokens based on the user role. this
+			// current solution is a vulnerability.
+			// role := tokbox.Role(tokbox.Subscriber)
+			// if isHost {
+			// 	// Only the host gets the publish ability on initial connection.
+			// 	role = tokbox.Role(tokbox.Publisher)
+			// }
+
+			token, err := newToken(session, role, userId)
+			if err != nil {
+				println("err", err.Error())
+				log.Println("token generation error:", err)
+				return
+			}
+
 			// Send the initial payload on join.
-			roomData := getMessage(ROOM_DATA, room.ToJSON())
-			if err = conn.WriteJSON(roomData); err != nil {
+			roomData := room.ToJSON()
+			roomData["token"] = token
+			roomData["tokBoxKey"] = s.TokBoxKey
+			roomMessage := getMessage(ROOM_DATA, roomData)
+			if err = conn.WriteJSON(roomMessage); err != nil {
 				log.Println("join error:", err)
 				return
 			}
@@ -135,11 +183,10 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 
-					err = conn.WriteJSON(map[string]interface{}{
+					if err = conn.WriteJSON(map[string]interface{}{
 						"payload": message.Payload,
 						"type":    message.Type,
-					})
-					if err != nil {
+					}); err != nil {
 						log.Println("send error:", err)
 					}
 				}
@@ -183,6 +230,15 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 			if isHost {
 				userId := message.Payload.(string)
 				s.State.AcceptCaller(currentRoomId, roomMessages, userId)
+
+				// session := newSessionFromId
+				// token, err := newToken(session, tokbox.Publisher, userId)
+				// if err != nil {
+				// 	log.Println("token generation error:", err)
+				// 	return
+				// }
+
+				// s.State.SendNewToken(currentRoomId, userId, "")
 			}
 
 		}
