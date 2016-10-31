@@ -8,6 +8,7 @@ class ModalButton extends Component {
     modal: PropTypes.func.isRequired,
     // modalProps: PropTypes.object,
     children: PropTypes.node.isRequired,
+    className: PropTypes.string,
   }
 
   state = {
@@ -26,9 +27,9 @@ class ModalButton extends Component {
   render() {
     // const ModalComponent = this.props.modal
     return (
-      <span>
+      <div className={this.props.className}>
         {this.renderChildren()}
-      </span>
+      </div>
     )
   }
 }

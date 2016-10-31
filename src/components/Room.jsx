@@ -57,6 +57,7 @@ class Room extends Component {
           {userId && (<ProfileDropdown userId={userId} />)}
         </div>
         <div className="Room__body">
+          {room.showCallers && (<CallersPanel />)}
           <div className="Room__content">
             {
               (this.props.room.viewers.indexOf(roomId) > -1) ? (
@@ -73,7 +74,6 @@ class Room extends Component {
                 </span>
               )
             }
-            {room.showCallers && (<CallersPanel />)}
           </div>
           <Comments
             userId={userId}

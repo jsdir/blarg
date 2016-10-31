@@ -5,6 +5,7 @@ import UserModal from 'components/UserModal'
 
 const UserPreviewButton = props => (
   <ModalButton
+    className={props.className}
     modal={UserModal}
     modalProps={{ userId: props.userId }}
   >
@@ -15,6 +16,7 @@ const UserPreviewButton = props => (
 UserPreviewButton.propTypes = {
   userId: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired,
+  className: PropTypes.string.isRequired,
 }
 
 export default UserPreviewButton

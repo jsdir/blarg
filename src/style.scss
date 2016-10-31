@@ -130,6 +130,7 @@ input {
   padding-left: 18px;
   padding-right: 18px;
   position: relative;
+  border: none;
 
   .Icon {
     margin-right: 8px;
@@ -195,12 +196,8 @@ input {
   }
 }
 
-.Viewers {
-  flex-grow: 1;
-  display: inline;
-}
-
 .ViewerInfo {
+  flex-shrink: 0;
 
   &__count {
     vertical-align: middle;
@@ -218,6 +215,12 @@ input {
 
 .ViewerList {
   flex-grow: 1;
+  display: flex;
+  overflow: hidden;
+
+  .User {
+    margin-right: 10px;
+  }
 }
 
 .Comments {
@@ -261,6 +264,7 @@ input {
 }
 
 .User{
+  display: inline-block;
 
   &__icon {
     $size: 48px;
@@ -359,4 +363,32 @@ input {
   border-radius: 4px;
   margin-bottom: 15px;
   padding: 10px;
+}
+
+.DropdownList {
+  line-height: initial;
+  padding: 12px;
+  margin: 0;
+  background-color: black;
+  list-style: none;
+  position: absolute;
+  box-sizing: border-box;
+  box-shadow: 0 0 15px rgba(#000, 0.4);
+  z-index: 1;
+
+  li {
+    padding: 5px 0;
+  }
+}
+
+.ProfileDropdown {
+  flex-shrink: 0;
+  padding-left: 30px;
+  position: relative;
+
+  .DropdownList {
+    right: 0px;
+    width: 130px;
+    top: 30px;
+  }
 }

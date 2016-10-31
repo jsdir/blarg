@@ -4,8 +4,8 @@ import Username from 'components/Username'
 import UserPreviewButton from 'components/UserPreviewButton'
 
 const renderUser = (username) => (
-  <UserPreviewButton userId={username}>
-    <a className="User">
+  <UserPreviewButton userId={username} className="User">
+    <a>
       <img
         className="User__icon"
         src={`https://twitter.com/${username}/profile_image?size=normal`}
