@@ -47,9 +47,9 @@ class Seat extends React.Component {
   }
 
   handleStreamCreated = (event) => {
-    console.log('seat::handleStreamCreated', event.stream)
+    // console.log('seat::handleStreamCreated', event.stream)
     const userId = event.stream.connection.data.replace('userId=', '')
-    if (userId === this.props.userId) {
+    if (userId !== this.props.seatUserId) {
       return
     }
 
