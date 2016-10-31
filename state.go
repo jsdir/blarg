@@ -313,11 +313,10 @@ func (s *LocalState) Reset(roomId string, messages chan StateMessage) {
 
 	s.rooms[roomId] = room
 
-	// TODO: we will test this without its dedicated action
-	// s.broadcast(roomId, messages, StateMessage{
-	// 	Type:    USER_LEFT_SEAT,
-	// 	Payload: userId,
-	// })
+	s.broadcast(roomId, messages, StateMessage{
+		Type:    RESET_ROOM,
+		Payload: "",
+	})
 }
 
 func (s *LocalState) broadcast(roomId string, skip chan StateMessage, message StateMessage) {
