@@ -14,7 +14,7 @@ $black: #000;
 // constants
 
 $large: 1.5em;
-$horizontal-spacing: 20px;
+$horizontal-spacing: 15px;
 $comments-width: 350px;
 $header-height: 60px;
 
@@ -45,6 +45,11 @@ $size-l: 1.4em;
     scrollbar-face-color: $foreground-color;
     scrollbar-track-color: $background-color;
   }
+}
+
+@mixin size($size) {
+  height: $size;
+  width: $size;
 }
 
 // tags
@@ -79,6 +84,7 @@ img {
 }
 
 input {
+  box-sizing: border-box;
   padding: 9px;
   outline: none;
   border: none;
@@ -141,58 +147,86 @@ input {
   }
 
   &__header {
-    line-height: $header-height;
-    vertical-align: middle;
     height: $header-height;
     border-bottom: 1px solid $grey;
-    padding-left: $horizontal-spacing;
+    padding: 0 15px 0 8px;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
 
     .User__icon {
       vertical-align: middle;
+      height: 38px;
+      width: 38px;
+    }
+
+    input {
+      border: 1px solid $dull-grey;
+      padding: 2px;
+      padding-left: 7px;
+      border-radius: 3px;
+      width: 300px;
+
+      &:focus {
+        border-color: $light-grey;
+      }
+
+      &:active {
+        border-color: $white;
+      }
+    }
+
+    .DropdownButton .User__icon {
+      @include size(24px);
+      padding: 0 10px;
+      border-left: 1px solid $dull-grey;
     }
   }
 
-  &__content {
+  &__body {
+    display: flex;
     position: relative;
     height: calc(100% - #{$header-height});
-    width: calc(100% - #{$comments-width});
+    width: 100%;
+  }
+
+  &__content {
+    flex-grow: 1;
   }
 }
 
 .Viewers {
+  flex-grow: 1;
   display: inline;
+}
+
+.ViewerInfo {
 
   &__count {
+    vertical-align: middle;
     margin-right: $horizontal-spacing;
 
     .Icon {
       margin-right: 4px;
     }
+
+    &.u-active {
+      font-weight: bold;
+    }
   }
 }
 
+.ViewerList {
+  flex-grow: 1;
+}
+
 .Comments {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  right: 0;
   background-color: $dark-grey;
   border-left: 1px solid $grey;
   width: $comments-width;
   display: flex;
   flex-direction: column;
-
-  &__title {
-    text-align: center;
-    font-size: 1.5em;
-    font-weight: 600;
-    height: $header-height;
-    line-height: $header-height;
-    margin: 0 15px;
-    border-bottom: 1px solid $grey;
-    box-sizing: border-box;
-  }
+  position: relative;
 
   &__list {
     flex-grow: 1;

@@ -1,7 +1,8 @@
 import React, { Component, PropTypes } from 'react'
 import { connect } from 'react-redux'
 
-import Viewers from 'components/Viewers'
+import ViewerInfo from 'components/ViewerInfo'
+import ViewerList from 'components/ViewerList'
 import Comments from 'components/Comments'
 import {
   addComment,
@@ -10,6 +11,8 @@ import {
 import Username from 'components/Username'
 import Seats from 'components/Seats'
 import CallersPanel from 'components/CallersPanel'
+import RoomTitle from 'components/RoomTitle'
+import ProfileDropdown from 'components/ProfileDropdown'
 
 class Room extends Component {
 
@@ -27,48 +30,11 @@ class Room extends Component {
     changeTitle: PropTypes.func.isRequired,
   }
 
-  constructor(...args) {
-    super(...args)
-
-    const { room } = this.props
-    this.state = { title: room.title }
-  }
-
-  handleChangeTitle = (event) => {
-    this.setState({ title: event.target.value })
-  }
-
-  handleBlurTitle = (event) => {
-    this.props.changeTitle(event.target.value)
-  }
-
-  handleSubmit = (event) => {
-    event.preventDefault()
-    this.props.changeTitle(this.state.title)
-  }
-
   addComment = (text) => {
     this.props.addComment({
       text,
       senderId: this.props.userId,
     })
-  }
-
-  renderTitle(isHost) {
-    const { room } = this.props
-
-    return isHost ? (
-      <form onSubmit={this.handleSubmit}>
-        <input
-          type="text"
-          value={this.state.title}
-          onChange={this.handleChangeTitle}
-          onBlur={this.handleBlurTitle}
-        />
-      </form>
-    ) : (
-      <span>{room.title}</span>
-    )
   }
 
   render() {
@@ -78,40 +44,44 @@ class Room extends Component {
     return (
       <div className="Room">
         <div className="Room__header">
-          <span className="Room__title">
-            {this.renderTitle(isHost)}
-          </span>
-          <Viewers
-            viewers={room.viewers}
+          <RoomTitle
+            isHost={isHost}
+            title={room.title}
+            onChange={this.props.changeTitle}
+          />
+          <ViewerInfo
             totalViewers={room.totalViewers}
             activeViewers={room.activeViewers}
           />
-          {userId && (<a href="/v1/logout">Logout</a>)}
+          <ViewerList viewers={room.viewers} />
+          {userId && (<ProfileDropdown userId={userId} />)}
         </div>
-        <div className="Room__content">
-          {
-            (this.props.room.viewers.indexOf(roomId) > -1) ? (
-              <Seats
-                room={room}
-                isHost={isHost}
-                userId={userId}
-                roomId={roomId}
-              />
-            ) : (
-              <span>
-                <Username username={roomId} />
-                {' isn\'t here right now. Shoutout on twitter.'}
-              </span>
-            )
-          }
-          {room.showCallers && (<CallersPanel />)}
+        <div className="Room__body">
+          <div className="Room__content">
+            {
+              (this.props.room.viewers.indexOf(roomId) > -1) ? (
+                <Seats
+                  room={room}
+                  isHost={isHost}
+                  userId={userId}
+                  roomId={roomId}
+                />
+              ) : (
+                <span>
+                  <Username username={roomId} />
+                  {' isn\'t here right now. Shoutout on twitter.'}
+                </span>
+              )
+            }
+            {room.showCallers && (<CallersPanel />)}
+          </div>
+          <Comments
+            userId={userId}
+            roomId={roomId}
+            comments={room.comments}
+            onAddComment={this.addComment}
+          />
         </div>
-        <Comments
-          userId={userId}
-          roomId={roomId}
-          comments={room.comments}
-          onAddComment={this.addComment}
-        />
       </div>
     )
   }

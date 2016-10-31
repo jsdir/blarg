@@ -91,9 +91,6 @@ class Comments extends Component {
   render() {
     return (
       <div className="Comments">
-        <div className="Comments__title">
-          Chat
-        </div>
         <div className="Comments__list" ref={this.setNode}>
           {this.props.comments.map(this.renderComment)}
         </div>

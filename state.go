@@ -121,7 +121,7 @@ func (s *LocalState) Join(roomId string, userId string, address string) (*Room, 
 	room, ok := s.rooms[roomId]
 	if !ok {
 		room = Room{
-			title:        roomId + "'s Room",
+			title:        "@" + roomId + "'s Room",
 			comments:     []Comment{},
 			subscribers:  map[chan StateMessage]string{},
 			totalAnons:   map[string]bool{},
