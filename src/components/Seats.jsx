@@ -2,9 +2,11 @@
 /* global OT */
 
 import React, { PropTypes } from 'react'
+import { connect } from 'react-redux'
 
 import Seat from 'components/Seat'
 import EmptySeat from 'components/EmptySeat'
+import { leaveSeat } from 'actions'
 
 const MAX_GUESTS = 3
 const SEAT_MARGIN = 12
@@ -25,6 +27,7 @@ class Seats extends React.Component {
       tokBoxKey: PropTypes.string.isRequired,
       sessionId: PropTypes.string.isRequired,
     }).isRequired,
+    leaveSeat: PropTypes.func.isRequired,
   }
 
   state = {
@@ -77,6 +80,8 @@ class Seats extends React.Component {
       size={this.state.size}
       userId={this.props.userId}
       key={seat.seatUserId}
+      leaveSeat={this.props.leaveSeat}
+      isHost={this.props.isHost}
     />
   )
 
@@ -85,11 +90,11 @@ class Seats extends React.Component {
 
     const { roomId, userId, room, isHost } = this.props
     const seats = [{
-      isHost: true,
+      // isHost: true,
       seatUserId: roomId,
     }].concat(room.seats.map(seatUserId => ({
       seatUserId,
-      isHost: false,
+      // isHost: false,
     })))
 
     const showEmptySeat = (room.seats.length < MAX_GUESTS)
@@ -119,4 +124,6 @@ class Seats extends React.Component {
   }
 }
 
-export default Seats
+export default connect(null, {
+  leaveSeat,
+})(Seats)

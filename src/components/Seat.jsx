@@ -3,6 +3,7 @@
 import React, { PropTypes } from 'react'
 
 import User from 'components/User'
+import CloseButton from 'components/CloseButton'
 
 class Seat extends React.Component {
 
@@ -17,12 +18,12 @@ class Seat extends React.Component {
       publish: PropTypes.func.isRequired,
       subscribe: PropTypes.func.isRequired,
     }).isRequired,
+    leaveSeat: PropTypes.func.isRequired,
   }
 
   componentDidMount() {
-    const { userId, seatUserId, session } = this.props
-    this.isMySeat = userId && (userId === seatUserId)
-    if (this.isMySeat) {
+    const { session } = this.props
+    if (this.isMySeat()) {
       // Publish the stream if the session is connected.
       if (session.connection) {
         this.publish()
@@ -58,6 +59,15 @@ class Seat extends React.Component {
     subscriber.once('videoElementCreated', this.handleVideoElementCreated)
   }
 
+  closeSeat = () => {
+    this.props.leaveSeat(this.props.seatUserId)
+  }
+
+  isMySeat() {
+    const { userId, seatUserId } = this.props
+    return userId && (userId === seatUserId)
+  }
+
   publish = () => {
     const publisher = OT.initPublisher(null, {
       resolution: '640x480',
@@ -78,6 +88,13 @@ class Seat extends React.Component {
     videoNode.appendChild(event.element)
   }
 
+  renderCloseButton() {
+    const isMySeat = this.isMySeat()
+    return (this.props.isHost ? !isMySeat : isMySeat) && (
+      <CloseButton onClick={this.closeSeat} />
+    )
+  }
+
   render() {
     const { size } = this.props
     return (
@@ -89,6 +106,7 @@ class Seat extends React.Component {
           className="Seat__container"
           ref={this.setVideoNode}
         />
+        {this.renderCloseButton()}
         <div className="Seat__user">
           <User
             showUsername

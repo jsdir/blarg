@@ -120,17 +120,18 @@ input {
 
 .Button {
   display: inline-block;
-  background-color: #00aced;
   outline: none;
-  padding: 9px;
+  background-color: #00aced;
   vertical-align: middle;
   color: #fff;
-  border-radius: 4px;
   font-weight: bold;
-  padding-left: 18px;
-  padding-right: 18px;
   position: relative;
   border: none;
+
+  &:not(.u-bare) {
+    padding: 9px 18px;
+    border-radius: 4px;
+  }
 
   .Icon {
     margin-right: 8px;
@@ -293,6 +294,31 @@ input {
   position: relative;
   margin: 12px;
   vertical-align: middle;
+
+  .CloseButton {
+    @include size(30px);
+    padding: 0;
+    border-radius: 50%;
+    background-color: rgba($black, 0.22);
+    border: 2px solid rgba($white, 0.65);
+    top: 10px;
+    right: 10px;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+
+    i {
+      margin: 0;
+    }
+  }
+
+  &:hover {
+    .CloseButton {
+      opacity: 1;
+    }
+  }
 
   &__user {
     position: absolute;

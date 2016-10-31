@@ -11,7 +11,7 @@ import {
   CALL,
   CANCEL_CALL,
   ACCEPT_CALLER,
-  KICK,
+  USER_LEFT_SEAT,
 } from 'constants'
 
 let connection
@@ -63,7 +63,7 @@ const connectionMiddleware = ({
     case CALL:
     case CANCEL_CALL:
     case ACCEPT_CALLER:
-    case KICK:
+    case USER_LEFT_SEAT:
       send(JSON.stringify(action))
       break
     default:

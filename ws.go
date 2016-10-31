@@ -19,7 +19,6 @@ const (
 	CANCEL_CALL   = "CANCEL_CALL"
 	ACCEPT_CALLER = "ACCEPT_CALLER"
 	SEAT_JOINED   = "SEAT_JOINED"
-	KICK          = "KICK"
 
 	// events
 	USER_JOINED    = "USER_JOINED"
@@ -230,13 +229,13 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 
 		case ACCEPT_CALLER:
 			if isHost {
-				userId := message.Payload.(string)
-				s.State.AcceptCaller(currentRoomId, roomMessages, userId)
+				callerId := message.Payload.(string)
+				s.State.AcceptCaller(currentRoomId, roomMessages, callerId)
 			}
-		case KICK:
-			if isHost {
-				userId := message.Payload.(string)
-				s.State.LeaveSeat(currentRoomId, roomMessages, userId)
+		case USER_LEFT_SEAT:
+			leavingUserId := message.Payload.(string)
+			if isHost || leavingUserId == userId {
+				s.State.LeaveSeat(currentRoomId, roomMessages, leavingUserId)
 			}
 		}
 	}

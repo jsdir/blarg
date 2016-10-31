@@ -12,7 +12,7 @@ import {
   ACCEPT_CALLER,
   CALL,
   CANCEL_CALL,
-  KICK,
+  USER_LEFT_SEAT,
 } from 'constants'
 
 // connectFeed()
@@ -37,5 +37,5 @@ export const acceptCaller = createAction(ACCEPT_CALLER)
 export const call = createAction(CALL)
 // cancelCall(userId)
 export const cancelCall = createAction(CANCEL_CALL)
-// kick(userId)
-export const kick = createAction(KICK)
+// leaveSeat(userId)
+export const leaveSeat = createAction(USER_LEFT_SEAT)

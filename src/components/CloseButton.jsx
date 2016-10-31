@@ -4,7 +4,10 @@ import Button from 'components/Button'
 import Icon from 'components/Icon'
 
 const CloseButton = props => (
-  <Button onClick={props.onClick}>
+  <Button
+    className="CloseButton u-bare"
+    onClick={props.onClick}
+  >
     <Icon type="times" />
   </Button>
 )
