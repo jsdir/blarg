@@ -27,9 +27,9 @@ class ModalButton extends Component {
   render() {
     // const ModalComponent = this.props.modal
     return (
-      <div className={this.props.className}>
+      <span className={this.props.className}>
         {this.renderChildren()}
-      </div>
+      </span>
     )
   }
 }

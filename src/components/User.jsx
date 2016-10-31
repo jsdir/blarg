@@ -22,6 +22,8 @@ const User = (props) => (props.showUsername ? (
   </span>
 ) : renderUser(props.username))
 
+// TODO: add `shouldComponentUpdate`
+
 User.propTypes = {
   username: PropTypes.string.isRequired,
   showUsername: PropTypes.bool,

@@ -4,8 +4,6 @@ import React, { PropTypes } from 'react'
 
 import User from 'components/User'
 
-const VIDEO_SIZE = 300
-
 class Seat extends React.Component {
 
   static propTypes = {
@@ -53,20 +51,31 @@ class Seat extends React.Component {
       return
     }
 
-    this.props.session.subscribe(event.stream, this.videoNode)
+    const subscriber = this.props.session.subscribe(event.stream, null, {
+      insertDefaultUI: false,
+    })
+
+    subscriber.once('videoElementCreated', this.handleVideoElementCreated)
   }
 
   publish = () => {
-    const publisher = OT.initPublisher(this.videoNode, {
-      resolution: `${VIDEO_SIZE}x${VIDEO_SIZE}`,
-      height: VIDEO_SIZE,
-      width: VIDEO_SIZE,
-      // insertDefaultUI: false,
+    const publisher = OT.initPublisher(null, {
+      resolution: '640x480',
+      insertDefaultUI: false,
     }, (error) => {
       if (error) throw error
     })
 
+    publisher.once('videoElementCreated', this.handleVideoElementCreated)
     this.props.session.publish(publisher)
+  }
+
+  handleVideoElementCreated = (event) => {
+    const { videoNode } = this
+    while (videoNode.firstChild) {
+      videoNode.removeChild(videoNode.firstChild)
+    }
+    videoNode.appendChild(event.element)
   }
 
   render() {
@@ -77,9 +86,8 @@ class Seat extends React.Component {
         style={{ height: size, width: size }}
       >
         <div
+          className="Seat__container"
           ref={this.setVideoNode}
-          height={480}
-          width={480}
         />
         <div className="Seat__user">
           <User
