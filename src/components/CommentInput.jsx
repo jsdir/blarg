@@ -27,7 +27,7 @@ class CommentInput extends Component {
     return (
       <form className="Comments__input" onSubmit={this.handleSubmit}>
         <input
-          placeholder="Leave a comment..."
+          placeholder="Send a message..."
           onChange={this.handleChangeCommentText}
           value={this.state.commentText}
         />

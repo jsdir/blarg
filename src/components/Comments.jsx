@@ -32,11 +32,13 @@ class Comments extends Component {
     const oldCommentCount = this.props.comments.length
     if (newCommentCount > oldCommentCount) {
       this.shouldScroll = this.isScrolledToBottom()
-      this.setState({
-        unreadMessages: this.state.unreadMessages + (
-          newCommentCount - oldCommentCount
-        ),
-      })
+      if (!this.shouldScroll) {
+        this.setState({
+          unreadMessages: this.state.unreadMessages + (
+            newCommentCount - oldCommentCount
+          ),
+        })
+      }
     }
   }
 

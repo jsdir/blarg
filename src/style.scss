@@ -291,9 +291,9 @@ button {
 
   &__unread {
     background-color: $primary-color;
-    padding: 20px;
+    padding: 15px;
     position: absolute;
-    bottom: 60px;
+    bottom: 52px;
     left: 0;
     right: 0;
   }
@@ -508,6 +508,10 @@ button {
 
   li {
     padding: 5px 0;
+
+    a:hover {
+      color: $light-grey;
+    }
   }
 }
 
