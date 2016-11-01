@@ -65,12 +65,19 @@ func (r *Room) ToJSON() map[string]interface{} {
 		viewers = append(viewers, userId)
 	}
 
+	// Limit the number of returned comments.
+	commentLimit := 100
+	commentIndex := len(r.comments) - commentLimit
+	if commentIndex < 0 {
+		commentIndex = 0
+	}
+
 	return map[string]interface{}{
 		"title":         r.title,
 		"viewers":       viewers,
 		"totalViewers":  totalViewers,
 		"activeViewers": activeViewers,
-		"comments":      r.comments,
+		"comments":      r.comments[commentIndex:],
 		"callers":       r.callers,
 		"seats":         r.seats,
 		"sessionId":     r.sessionId,
