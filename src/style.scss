@@ -230,6 +230,21 @@ button {
   &__content {
     flex-grow: 1;
   }
+
+  &__absent {
+    margin-top: 100px;
+    text-align: center;
+
+    &-icon {
+      color: $grey;
+      font-size: 16em;
+      font-weight: bold;
+    }
+
+    &-message {
+      font-size: 1.4em;
+    }
+  }
 }
 
 .ViewerInfo {

@@ -68,10 +68,15 @@ class Room extends Component {
                   roomId={roomId}
                 />
               ) : (
-                <span>
-                  <Username username={roomId} />
-                  {' isn\'t here right now. Shoutout on twitter.'}
-                </span>
+                <div className="Room__absent">
+                  <div className="Room__absent-icon">
+                    :/
+                  </div>
+                  <div className="Room__absent-message">
+                    <Username username={roomId} />
+                    {' isn\'t here right now.'}
+                  </div>
+                </div>
               )
             }
           </div>
