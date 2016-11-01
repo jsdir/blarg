@@ -16,7 +16,7 @@ const renderUser = (username) => (
 )
 
 const User = (props) => (props.showUsername ? (
-  <span>
+  <span className="UserGroup">
     {renderUser(props.username)}
     <Username username={props.username} />
   </span>

@@ -26,7 +26,10 @@ class CallersPanelCaller extends Component {
           showUsername
           username={this.props.userId}
         />
-        <Button onClick={this.acceptCaller}>
+        <Button
+          className="Button--primary"
+          onClick={this.acceptCaller}
+        >
           Accept
         </Button>
       </div>

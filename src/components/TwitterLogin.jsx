@@ -11,9 +11,11 @@ const TwitterLogin = (props) => {
     : ''
   return (
     <Button
+      className="TwitterLogin"
       component="a"
       href={`${API_BASE_URL}/authenticate${params}`}
-    ><Icon type="twitter" />
+    >
+      <Icon type="twitter" />
       {props.children || 'Login with Twitter'}
     </Button>
   )

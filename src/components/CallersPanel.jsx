@@ -32,15 +32,19 @@ class CallersPanel extends Component {
       <div className="CallersPanel">
         <div className="CallersPanel__header">
           <span>
-            {this.props.callers.length}
+            <strong>
+              {this.props.callers.length}
+            </strong>
             {' '}
             {this.props.callers.length === 1 ? 'person' : 'people'}
             {' '}
-            calling in
+            calling in.
           </span>
           <CloseButton onClick={this.props.hideCallers} />
         </div>
-        {this.props.callers.map(this.renderCaller)}
+        <div className="CallersPanel__callers">
+          {this.props.callers.map(this.renderCaller)}
+        </div>
       </div>
     )
   }

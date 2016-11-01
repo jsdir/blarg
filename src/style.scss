@@ -10,6 +10,7 @@ $dull-grey: #333;
 $dark-grey: #222;
 $base-color: $white;
 $black: #000;
+$primary-color: #2f5671;
 
 // constants
 
@@ -25,7 +26,7 @@ $size-l: 1.4em;
 @mixin scrollbars(
   $size,
   $foreground-color,
-  $background-color: darker($foreground-color, 20%)
+  $background-color: transparent
 ) {
   ::-webkit-scrollbar {
       width:  $size;
@@ -50,6 +51,22 @@ $size-l: 1.4em;
 @mixin size($size) {
   height: $size;
   width: $size;
+}
+
+@mixin button-colors($color) {
+  background-color: $color;
+  border-color: lighten($color, 20%);
+
+  &:hover {
+    background-color: darken($color, 10%);
+    border-color: lighten($color, 10%);
+  }
+
+  &:active {
+    background-color: darken($color, 18%);
+    border-color: $color;
+    color: $white;
+  }
 }
 
 // tags
@@ -118,24 +135,42 @@ input {
   }
 }
 
-.Button {
+button {
   display: inline-block;
   outline: none;
-  background-color: #00aced;
   vertical-align: middle;
   color: #fff;
   font-weight: bold;
   position: relative;
   border: none;
+  background: transparent;
+}
 
-  &:not(.u-bare) {
-    padding: 9px 18px;
-    border-radius: 4px;
+.Button {
+  padding: 9px 18px;
+  border-radius: 4px;
+  border: 1px solid #fff;
+
+  &:hover {
+    background-color: $light-grey;
+  }
+
+  &:active {
+    background-color: #fff;
+    color: $black;
+  }
+
+  &--primary {
+    @include button-colors($primary-color);
   }
 
   .Icon {
     margin-right: 8px;
   }
+}
+
+.TwitterLogin {
+  @include button-colors(#00aced);
 }
 
 .Room {
@@ -255,7 +290,7 @@ input {
   }
 
   &__unread {
-    background-color: purple;
+    background-color: $primary-color;
     padding: 20px;
     position: absolute;
     bottom: 60px;
@@ -279,6 +314,7 @@ input {
   display: flex;
   justify-content: center;
   align-items: center;
+  min-width: 300px;
 
   &__container {
     display: flex;
@@ -356,10 +392,44 @@ input {
 }
 
 .CallersPanel {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
 
   &__caller {
     display: flex;
+    margin-bottom: 15px;
+
+    .UserGroup {
+      flex-grow: 1;
+      margin-right: 15px;
+    }
+
+    .User {
+      margin-right: 10px;
+    }
+  }
+
+  &__callers {
+    padding: 0 15px;
+    overflow-y: scroll;
+  }
+
+  &__header {
+    padding: 15px;
+
+    .CloseButton {
+      float: right;
+
+      i {
+        margin: 0;
+      }
+    }
   }
 }
 
@@ -369,9 +439,38 @@ input {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 
   &__waiting {
     font-size: $size-l;
+    padding: 15px;
+
+    i {
+      margin-right: 10px;
+    }
+  }
+
+  &__callers {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+
+    .User {
+      margin: 0 8px;
+    }
+  }
+
+  &__link {
+    background-color: $grey;
+    border: 1px solid $light-grey;
+    border-radius: 3px;
+    padding: 4px;
+    font-family: monospace;
+    font-size: 0.8em;
+  }
+
+  .Button--primary {
+    font-size: 1.2em;
   }
 }
 

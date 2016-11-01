@@ -7,8 +7,10 @@ const Button = props => {
 
   return (
     <Component
-      {..._.omit(props, 'component')}
-      className={classnames('Button', props.className)}
+      {..._.omit(props, 'component', 'primary')}
+      className={classnames('Button', props.className, {
+        'Button--primary': props.primary,
+      })}
       onClick={() => props.onClick && props.onClick()}
     />
   )
@@ -22,6 +24,7 @@ Button.propTypes = {
     PropTypes.func,
   ]),
   onClick: PropTypes.func,
+  primary: PropTypes.bool,
 }
 
 Button.defaultProps = {

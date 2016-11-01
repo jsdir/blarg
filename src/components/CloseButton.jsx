@@ -1,15 +1,14 @@
 import React, { PropTypes } from 'react'
 
-import Button from 'components/Button'
 import Icon from 'components/Icon'
 
 const CloseButton = props => (
-  <Button
-    className="CloseButton u-bare"
+  <button
+    className="CloseButton"
     onClick={props.onClick}
   >
     <Icon type="times" />
-  </Button>
+  </button>
 )
 
 CloseButton.propTypes = {

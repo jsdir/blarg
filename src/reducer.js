@@ -92,6 +92,7 @@ const roomReducer = handleActions({
   [ACCEPT_CALLER]: (state, action) => update(state, {
     callers: { $apply: removeFromArray(action.payload) },
     seats: { $push: [action.payload] },
+    showCallers: { $set: false },
   }),
   [USER_LEFT_SEAT]: (state, action) => update(state, {
     seats: { $apply: removeFromArray(action.payload) },

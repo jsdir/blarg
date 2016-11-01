@@ -40,8 +40,8 @@ class Seats extends React.Component {
     this.session = OT.initSession(tokBoxKey, sessionId)
     this.session.connect(token, (error) => {
       if (error) {
-        console.error(error.message)
-        return
+        throw error
+        // return
       }
     })
   }
@@ -115,6 +115,7 @@ class Seats extends React.Component {
                 isHost={isHost}
                 userId={userId}
                 callers={room.callers}
+                seatCount={room.seats.length}
               />
             )
           }
