@@ -2,15 +2,12 @@ import React, { PropTypes } from 'react'
 
 import Username from 'components/Username'
 import UserPreviewButton from 'components/UserPreviewButton'
+import UserIcon from 'components/UserIcon'
 
 const renderUser = (username) => (
   <UserPreviewButton userId={username} className="User">
     <a>
-      <img
-        className="User__icon"
-        src={`https://twitter.com/${username}/profile_image?size=normal`}
-        alt={username}
-      />
+      <UserIcon userId={username} />
     </a>
   </UserPreviewButton>
 )
@@ -30,3 +27,5 @@ User.propTypes = {
 }
 
 export default User
+
+// TODO: reorganize users

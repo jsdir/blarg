@@ -1,12 +1,10 @@
 import React, { Component, PropTypes } from 'react'
 
-// import Modal from 'react-modal'
-
 class ModalButton extends Component {
 
   static propTypes = {
     modal: PropTypes.func.isRequired,
-    // modalProps: PropTypes.object,
+    modalProps: PropTypes.shape({}),
     children: PropTypes.node.isRequired,
     className: PropTypes.string,
   }
@@ -19,44 +17,41 @@ class ModalButton extends Component {
     this.setState({ showModal: !this.state.showModal })
   )
 
+  handleClose = () => (
+    this.setState({ showModal: false })
+  )
+
+  handleContainerClick = (event) => {
+    event.stopPropagation()
+  }
+
   renderChildren = () => React.cloneElement(
     React.Children.only(this.props.children),
     { onClick: this.handleOnClick }
   )
 
+  renderModalContainer() {
+    const ModalComponent = this.props.modal
+    return (
+      <div className="Modal__backdrop" onClick={this.handleClose}>
+        <div className="Modal__container" onClick={this.handleContainerClick}>
+          <ModalComponent
+            {...this.props.modalProps}
+            onClose={this.handleClose}
+          />
+        </div>
+      </div>
+    )
+  }
+
   render() {
-    // const ModalComponent = this.props.modal
     return (
       <span className={this.props.className}>
         {this.renderChildren()}
+        {this.state.showModal && this.renderModalContainer()}
       </span>
     )
   }
 }
-
-/*
-   <Modal
-   className="ModalContainer"
-   show={this.state.showModal}
-   onHide={this.handleOnClick}
-   backdropClassName="ModalContainer__backdrop"
-   transition={transition}
-   dialogTransitionTimeout={TRANSITION_TIMEOUT}
-   backdropTransitionTimeout={TRANSITION_TIMEOUT}
-   >
-   <div className="ModalContainer__dialog">
-   <ModalComponent onClose={this.handleOnClick} />
-   </div>
-   </Modal>
- */
-
-/*
-   <Modal
-   isOpen={this.state.showModal}
-   onRequestClose={this.handleOnClick}
-   >
-   <ModalComponent />
-   </Modal>
- */
 
 export default ModalButton

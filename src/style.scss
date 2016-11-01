@@ -11,6 +11,7 @@ $dark-grey: #222;
 $base-color: $white;
 $black: #000;
 $primary-color: #2f5671;
+$twitter-color: #00aced;
 
 // constants
 
@@ -170,7 +171,7 @@ button {
 }
 
 .TwitterLogin {
-  @include button-colors(#00aced);
+  @include button-colors($twitter-color);
 }
 
 .Room {
@@ -539,5 +540,76 @@ button {
     right: 0px;
     width: 130px;
     top: 30px;
+  }
+}
+
+.Modal {
+  &__backdrop {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.75);
+  }
+
+  &__container {
+    background-color: $white;
+    border-radius: 3px;
+    padding: 30px;
+    position: relative;
+
+    .CloseButton {
+      color: $dull-grey;
+      position: absolute;
+      top: 5px;
+      font-size: 24px;
+      right: 5px;
+    }
+  }
+}
+
+.UserModal {
+  display: flex;
+  flex-direction: column;
+  width: 340px;
+  color: $dull-grey;
+
+  &__header {
+    font-size: 1.5em;
+
+    .User__icon {
+      @include size(48px);
+      border: 1px solid $light-grey;
+    }
+
+    .UserModal__username, .User__icon {
+      margin-right: 15px;
+    }
+
+    .UserModal__username {
+      font-weight: 600;
+    }
+  }
+
+  .fa-twitter {
+    color: $twitter-color;
+  }
+
+  &__actions {
+    margin-top: 25px;
+
+    .Button {
+      width: 100%;
+      display: inline-block;
+      box-sizing: border-box;
+      text-align: center;
+      border: none;
+    }
   }
 }

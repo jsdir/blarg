@@ -41,6 +41,7 @@
     "history": "^4.3.0",
     "lodash": "^4.16.4",
     "react": "^15.3.2",
+    "react-addons-css-transition-group": "^15.3.2",
     "react-addons-update": "^15.3.2",
     "react-dom": "^15.3.2",
     "react-redux": "^4.4.5",
