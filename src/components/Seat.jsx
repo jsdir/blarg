@@ -28,7 +28,7 @@ class Seat extends React.Component {
       if (session.connection) {
         this.publish()
       } else {
-        session.on('sessionConnected', this.publish)
+        session.once('sessionConnected', this.publish)
       }
     } else {
       this.props.session.on('streamCreated', this.handleStreamCreated)
@@ -36,8 +36,18 @@ class Seat extends React.Component {
   }
 
   componentWillUnmount() {
+    const { session } = this.props
+
     if (!this.isMySeat) {
       this.props.session.off('streamCreated', this.handleStreamCreated)
+    }
+
+    if (this.publisher) {
+      session.unpublish(this.publisher)
+    }
+
+    if (this.subscriber) {
+      session.unsubscribe(this.subscriber)
     }
   }
 
@@ -46,17 +56,16 @@ class Seat extends React.Component {
   }
 
   handleStreamCreated = (event) => {
-    // console.log('seat::handleStreamCreated', event.stream)
     const userId = event.stream.connection.data.replace('userId=', '')
     if (userId !== this.props.seatUserId) {
       return
     }
 
-    const subscriber = this.props.session.subscribe(event.stream, null, {
+    this.subscriber = this.props.session.subscribe(event.stream, null, {
       insertDefaultUI: false,
     })
 
-    subscriber.once('videoElementCreated', this.handleVideoElementCreated)
+    this.subscriber.once('videoElementCreated', this.handleVideoElementCreated)
   }
 
   closeSeat = () => {
@@ -69,19 +78,23 @@ class Seat extends React.Component {
   }
 
   publish = () => {
-    const publisher = OT.initPublisher(null, {
+    this.publisher = OT.initPublisher(null, {
       resolution: '640x480',
       insertDefaultUI: false,
     }, (error) => {
       if (error) throw error
     })
 
-    publisher.once('videoElementCreated', this.handleVideoElementCreated)
-    this.props.session.publish(publisher)
+    this.publisher.once('videoElementCreated', this.handleVideoElementCreated)
+    this.props.session.publish(this.publisher)
   }
 
   handleVideoElementCreated = (event) => {
     const { videoNode } = this
+    if (!videoNode) {
+      return
+    }
+
     while (videoNode.firstChild) {
       videoNode.removeChild(videoNode.firstChild)
     }
