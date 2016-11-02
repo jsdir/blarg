@@ -27,6 +27,7 @@ const (
 	TITLE_CHANGED  = "TITLE_CHANGED"
 	USER_LEFT_SEAT = "USER_LEFT_SEAT"
 	RESET_ROOM     = "RESET_ROOM"
+	USER_CALLED    = "USER_CALLED"
 )
 
 var upgrader = websocket.Upgrader{

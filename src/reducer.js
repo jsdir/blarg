@@ -21,6 +21,7 @@ import {
   ACCEPT_CALLER,
   USER_LEFT_SEAT,
   RESET_ROOM,
+  USER_CALLED,
 } from 'constants'
 
 const addComment = (state, action) => update(state, {
@@ -46,6 +47,10 @@ const hideCallers = (state) => update(state, {
 const removeFromArray = value => values => (
   values.filter(v => v !== value)
 )
+
+const call = (state, action) => update(state, {
+  callers: { $push: [action.payload] },
+})
 
 const roomReducer = handleActions({
   [JOIN]: getDefaultRoom,
@@ -83,9 +88,8 @@ const roomReducer = handleActions({
     showCallers: { $set: true },
   }),
   [HIDE_CALLERS]: hideCallers,
-  [CALL]: (state, action) => update(state, {
-    callers: { $push: [action.payload] },
-  }),
+  [CALL]: call,
+  [USER_CALLED]: call,
   [CANCEL_CALL]: (state, action) => update(state, {
     callers: { $apply: removeFromArray(action.payload) },
   }),

@@ -241,7 +241,7 @@ func (s *LocalState) Call(roomId string, messages chan StateMessage, userId stri
 	// Only send if the user is not already calling.
 	if ok {
 		s.broadcast(roomId, messages, StateMessage{
-			Type:    CALL,
+			Type:    USER_CALLED,
 			Payload: userId,
 		})
 	}
