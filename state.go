@@ -44,7 +44,7 @@ func setRemove(values []string, value string) ([]string, bool) {
 		if v == value {
 			ok = true
 		} else {
-			newValues = append(newValues, value)
+			newValues = append(newValues, v)
 		}
 	}
 	return newValues, ok
