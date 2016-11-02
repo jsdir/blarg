@@ -289,14 +289,12 @@ func (s *LocalState) LeaveSeat(roomId string, messages chan StateMessage, userId
 		return
 	}
 
-	room.seats, ok = setRemove(room.seats, userId)
-	if ok {
-		s.rooms[roomId] = room
-		s.broadcast(roomId, messages, StateMessage{
-			Type:    USER_LEFT_SEAT,
-			Payload: userId,
-		})
-	}
+	room.seats, _ = setRemove(room.seats, userId)
+	s.rooms[roomId] = room
+	s.broadcast(roomId, messages, StateMessage{
+		Type:    USER_LEFT_SEAT,
+		Payload: userId,
+	})
 }
 
 func (s *LocalState) SetRoomSessionId(roomId string, sessionId string) {
