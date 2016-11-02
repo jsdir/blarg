@@ -10,24 +10,25 @@ import (
 )
 
 const (
-	JOIN          = "JOIN"
-	LEAVE         = "LEAVE"
-	ADD_COMMENT   = "ADD_COMMENT"
-	CHANGE_TITLE  = "CHANGE_TITLE"
-	ROOM_DATA     = "ROOM_DATA"
-	CALL          = "CALL"
-	CANCEL_CALL   = "CANCEL_CALL"
-	ACCEPT_CALLER = "ACCEPT_CALLER"
-	SEAT_JOINED   = "SEAT_JOINED"
+	ROOM_DATA  = "ROOM_DATA"
+	RESET_ROOM = "RESET_ROOM"
 
-	// events
-	USER_JOINED    = "USER_JOINED"
-	USER_LEFT      = "USER_LEFT"
-	COMMENT_ADDED  = "COMMENT_ADDED"
-	TITLE_CHANGED  = "TITLE_CHANGED"
-	USER_LEFT_SEAT = "USER_LEFT_SEAT"
-	RESET_ROOM     = "RESET_ROOM"
-	USER_CALLED    = "USER_CALLED"
+	JOIN_ACTION          = "JOIN_ACTION"
+	JOIN                 = "JOIN"
+	LEAVE_ACTION         = "LEAVE_ACTION"
+	LEAVE                = "LEAVE"
+	ADD_COMMENT_ACTION   = "ADD_COMMENT_ACTION"
+	ADD_COMMENT          = "ADD_COMMENT"
+	CHANGE_TITLE_ACTION  = "CHANGE_TITLE_ACTION"
+	CHANGE_TITLE         = "CHANGE_TITLE"
+	ACCEPT_CALLER_ACTION = "ACCEPT_CALLER_ACTION"
+	ACCEPT_CALLER        = "ACCEPT_CALLER"
+	LEAVE_SEAT_ACTION    = "LEAVE_SEAT_ACTION"
+	LEAVE_SEAT           = "LEAVE_SEAT"
+	CALL_ACTION          = "CALL_ACTION"
+	CALL                 = "CALL"
+	CANCEL_CALL_ACTION   = "CANCEL_CALL_ACTION"
+	CANCEL_CALL          = "CANCEL_CALL"
 )
 
 var upgrader = websocket.Upgrader{
@@ -125,7 +126,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 		}
 
 		switch message.Type {
-		case JOIN:
+		case JOIN_ACTION:
 			leave()
 			currentRoomId = message.Payload.(string)
 			isHost = userId != "" && userId == currentRoomId
@@ -194,10 +195,10 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 				}
 			}()
 
-		case LEAVE:
+		case LEAVE_ACTION:
 			leave()
 
-		case ADD_COMMENT:
+		case ADD_COMMENT_ACTION:
 			// Checks that:
 			// 1. A room is already loaded.
 			// 2. The user is authenticated.
@@ -208,7 +209,7 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 				})
 			}
 
-		case CHANGE_TITLE:
+		case CHANGE_TITLE_ACTION:
 			// Checks that:
 			// 1. A room is already loaded.
 			// 2. The user is authenticated.
@@ -218,25 +219,26 @@ func (s *Server) HandleWS(w http.ResponseWriter, r *http.Request) {
 				s.State.ChangeRoomTitle(currentRoomId, roomMessages, title)
 			}
 
-		case CALL:
-			if currentRoomId != "" && userId != "" && currentRoomId != userId {
-				s.State.Call(currentRoomId, roomMessages, userId)
-			}
-
-		case CANCEL_CALL:
-			if currentRoomId != "" && userId != "" && currentRoomId != userId {
-				s.State.CancelCall(currentRoomId, roomMessages, userId)
-			}
-
-		case ACCEPT_CALLER:
+		case ACCEPT_CALLER_ACTION:
 			if isHost {
 				callerId := message.Payload.(string)
 				s.State.AcceptCaller(currentRoomId, roomMessages, callerId)
 			}
-		case USER_LEFT_SEAT:
+
+		case LEAVE_SEAT_ACTION:
 			leavingUserId := message.Payload.(string)
 			if isHost || leavingUserId == userId {
 				s.State.LeaveSeat(currentRoomId, roomMessages, leavingUserId)
+			}
+
+		case CALL_ACTION:
+			if currentRoomId != "" && userId != "" && currentRoomId != userId {
+				s.State.Call(currentRoomId, roomMessages, userId)
+			}
+
+		case CANCEL_CALL_ACTION:
+			if currentRoomId != "" && userId != "" && currentRoomId != userId {
+				s.State.CancelCall(currentRoomId, roomMessages, userId)
 			}
 		}
 	}

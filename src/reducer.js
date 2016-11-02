@@ -5,23 +5,27 @@ import { handleActions } from 'redux-actions'
 import update from 'react-addons-update'
 
 import {
-  JOIN,
-  LEAVE,
-  ADD_COMMENT,
   ROOM_DATA,
-  COMMENT_ADDED,
-  USER_JOINED,
-  USER_LEFT,
-  CHANGE_TITLE,
-  TITLE_CHANGED,
   SHOW_CALLERS,
   HIDE_CALLERS,
-  CALL,
-  CANCEL_CALL,
-  ACCEPT_CALLER,
-  USER_LEFT_SEAT,
   RESET_ROOM,
-  USER_CALLED,
+
+  JOIN_ACTION,
+  JOIN,
+  LEAVE_ACTION,
+  LEAVE,
+  ADD_COMMENT_ACTION,
+  ADD_COMMENT,
+  CHANGE_TITLE_ACTION,
+  CHANGE_TITLE,
+  ACCEPT_CALLER_ACTION,
+  ACCEPT_CALLER,
+  LEAVE_SEAT_ACTION,
+  LEAVE_SEAT,
+  CALL_ACTION,
+  CALL,
+  CANCEL_CALL_ACTION,
+  CANCEL_CALL,
 } from 'constants'
 
 const addComment = (state, action) => update(state, {
@@ -48,17 +52,36 @@ const removeFromArray = value => values => (
   values.filter(v => v !== value)
 )
 
+const acceptCaller = (state, action) => update(state, {
+  callers: { $apply: removeFromArray(action.payload) },
+  seats: { $push: [action.payload] },
+  showCallers: { $set: false },
+})
+
 const call = (state, action) => update(state, {
   callers: { $push: [action.payload] },
 })
 
+const leaveSeat = (state, action) => update(state, {
+  seats: { $apply: removeFromArray(action.payload) },
+})
+
+const cancelCall = (state, action) => update(state, {
+  callers: { $apply: removeFromArray(action.payload) },
+})
+
 const roomReducer = handleActions({
-  [JOIN]: getDefaultRoom,
-  [LEAVE]: getDefaultRoom,
-  [ADD_COMMENT]: addComment,
-  [COMMENT_ADDED]: addComment,
   [ROOM_DATA]: (_, action) => action.payload,
-  [USER_JOINED]: (state, action) => update(state, {
+  [SHOW_CALLERS]: (state) => update(state, {
+    showCallers: { $set: true },
+  }),
+  [HIDE_CALLERS]: hideCallers,
+  [RESET_ROOM]: (state) => update(state, {
+    callers: { $set: [] },
+    seats: { $set: [] },
+  }),
+  [JOIN_ACTION]: getDefaultRoom,
+  [JOIN]: (state, action) => update(state, {
     totalViewers: { $set: action.payload.totalViewers },
     activeViewers: { $set: action.payload.activeViewers },
     ...(action.payload.userId && {
@@ -70,7 +93,8 @@ const roomReducer = handleActions({
       }] },
     }),
   }),
-  [USER_LEFT]: (state, action) => update(state, {
+  [LEAVE_ACTION]: getDefaultRoom,
+  [LEAVE]: (state, action) => update(state, {
     totalViewers: { $set: action.payload.totalViewers },
     activeViewers: { $set: action.payload.activeViewers },
     ...(action.payload.userId && {
@@ -82,29 +106,18 @@ const roomReducer = handleActions({
       }] },
     }),
   }),
+  [ADD_COMMENT_ACTION]: addComment,
+  [ADD_COMMENT]: addComment,
+  [CHANGE_TITLE_ACTION]: changeTitle,
   [CHANGE_TITLE]: changeTitle,
-  [TITLE_CHANGED]: changeTitle,
-  [SHOW_CALLERS]: (state) => update(state, {
-    showCallers: { $set: true },
-  }),
-  [HIDE_CALLERS]: hideCallers,
+  [ACCEPT_CALLER_ACTION]: acceptCaller,
+  [ACCEPT_CALLER]: acceptCaller,
+  [LEAVE_SEAT_ACTION]: leaveSeat,
+  [LEAVE_SEAT]: leaveSeat,
+  [CALL_ACTION]: call,
   [CALL]: call,
-  [USER_CALLED]: call,
-  [CANCEL_CALL]: (state, action) => update(state, {
-    callers: { $apply: removeFromArray(action.payload) },
-  }),
-  [ACCEPT_CALLER]: (state, action) => update(state, {
-    callers: { $apply: removeFromArray(action.payload) },
-    seats: { $push: [action.payload] },
-    showCallers: { $set: false },
-  }),
-  [USER_LEFT_SEAT]: (state, action) => update(state, {
-    seats: { $apply: removeFromArray(action.payload) },
-  }),
-  [RESET_ROOM]: (state) => update(state, {
-    callers: { $set: [] },
-    seats: { $set: [] },
-  }),
+  [CANCEL_CALL_ACTION]: cancelCall,
+  [CANCEL_CALL]: cancelCall,
 }, defaultRoom)
 
 const userReducer = (state = {

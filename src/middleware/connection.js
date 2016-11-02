@@ -4,14 +4,14 @@
 import { handleError } from 'actions'
 import {
   CONNECT_FEED,
-  JOIN,
-  LEAVE,
-  ADD_COMMENT,
-  CHANGE_TITLE,
-  CALL,
-  CANCEL_CALL,
-  ACCEPT_CALLER,
-  USER_LEFT_SEAT,
+  JOIN_ACTION,
+  LEAVE_ACTION,
+  ADD_COMMENT_ACTION,
+  CHANGE_TITLE_ACTION,
+  CALL_ACTION,
+  CANCEL_CALL_ACTION,
+  ACCEPT_CALLER_ACTION,
+  LEAVE_SEAT_ACTION,
 } from 'constants'
 
 let connection
@@ -49,7 +49,7 @@ const connectionMiddleware = ({
         messages.forEach(message => connection.send(message))
       }
       break
-    case ADD_COMMENT:
+    case ADD_COMMENT_ACTION:
       send(
         JSON.stringify({
           type: action.type,
@@ -57,13 +57,13 @@ const connectionMiddleware = ({
         })
       )
       break
-    case JOIN:
-    case LEAVE:
-    case CHANGE_TITLE:
-    case CALL:
-    case CANCEL_CALL:
-    case ACCEPT_CALLER:
-    case USER_LEFT_SEAT:
+    case JOIN_ACTION:
+    case LEAVE_ACTION:
+    case CHANGE_TITLE_ACTION:
+    case CALL_ACTION:
+    case CANCEL_CALL_ACTION:
+    case ACCEPT_CALLER_ACTION:
+    case LEAVE_SEAT_ACTION:
       send(JSON.stringify(action))
       break
     default:

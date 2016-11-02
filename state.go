@@ -164,7 +164,7 @@ func (s *LocalState) Join(roomId string, userId string, address string) (*Room, 
 	}
 
 	s.broadcast(roomId, messages, StateMessage{
-		Type:    USER_JOINED,
+		Type:    JOIN,
 		Payload: room.getViewerPayload(userId),
 	})
 
@@ -191,7 +191,7 @@ func (s *LocalState) Leave(roomId string, messages chan StateMessage, userId str
 	}
 
 	s.broadcast(roomId, messages, StateMessage{
-		Type:    USER_LEFT,
+		Type:    LEAVE,
 		Payload: room.getViewerPayload(userId),
 	})
 }
@@ -206,7 +206,7 @@ func (s *LocalState) AddComment(roomId string, skip chan StateMessage, comment C
 	s.rooms[roomId] = room
 
 	s.broadcast(roomId, skip, StateMessage{
-		Type: COMMENT_ADDED,
+		Type: ADD_COMMENT,
 		Payload: map[string]interface{}{
 			"text":     comment.Text,
 			"senderId": comment.SenderId,
@@ -224,7 +224,7 @@ func (s *LocalState) ChangeRoomTitle(roomId string, messages chan StateMessage, 
 	s.rooms[roomId] = room
 
 	s.broadcast(roomId, messages, StateMessage{
-		Type:    TITLE_CHANGED,
+		Type:    CHANGE_TITLE,
 		Payload: title,
 	})
 }
@@ -241,7 +241,7 @@ func (s *LocalState) Call(roomId string, messages chan StateMessage, userId stri
 	// Only send if the user is not already calling.
 	if ok {
 		s.broadcast(roomId, messages, StateMessage{
-			Type:    USER_CALLED,
+			Type:    CALL,
 			Payload: userId,
 		})
 	}
@@ -292,7 +292,7 @@ func (s *LocalState) LeaveSeat(roomId string, messages chan StateMessage, userId
 	room.seats, _ = setRemove(room.seats, userId)
 	s.rooms[roomId] = room
 	s.broadcast(roomId, messages, StateMessage{
-		Type:    USER_LEFT_SEAT,
+		Type:    LEAVE_SEAT,
 		Payload: userId,
 	})
 }
